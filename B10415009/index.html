@@ -190,7 +190,7 @@ github: <a href="https://github.com/chengchunhsu/xv6-public" target="_blank">htt
 <li>新增<code>ilock_trans</code>、<code>ilock_ext</code>、<code>writei_ext</code>、<code>cupdate</code>等函式來更新子節點、<code>checksums</code>值，並使kernal在recovery階段時不需去計算<code>checksum</code>值且傳回error。</li>
 <li>新增<code>iduplicate</code>、<code>irescue</code>等函式來執行文件備份及救援。</li>
 <li>新增<code>ichecksum</code>函式來計算<code>inode</code>的<code>checksums</code>值</li>
-</ul><h4 id="ichecksum"><a class="anchor hidden-xs" href="#ichecksum" title="ichecksum"><span class="octicon octicon-link"></span></a>ichecksum()</h4><pre><code class="clike hljs"><div class="wrapper"><div class="gutter linenumber"><span data-linenumber="1"></span>
+</ul><h4 id="ichecksum0"><a class="anchor hidden-xs" href="#ichecksum0" title="ichecksum0"><span class="octicon octicon-link"></span></a>ichecksum()</h4><pre><code class="clike hljs"><div class="wrapper"><div class="gutter linenumber"><span data-linenumber="1"></span>
 <span data-linenumber="2"></span>
 <span data-linenumber="3"></span>
 <span data-linenumber="4"></span>
@@ -719,7 +719,177 @@ reads <strong>n</strong> blocks in inode <strong>ip</strong> starting from <stro
     memset((<span class="hljs-keyword">void</span> *) buf, <span class="hljs-number">0</span>, n);
   }
 }
-</div></div></code></pre><hr><h3 id="execc"><a class="anchor hidden-xs" href="#execc" title="execc"><span class="octicon octicon-link"></span></a>exec.c</h3><ul>
+</div></div></code></pre><hr><ul>
+<li>修改<code>writei()</code>函式。</li>
+<li>新增<code>write_ext()</code>函式。</li>
+<li>將<code>writei()</code>實做移至<code>write_ext()</code>函式。</li>
+</ul><h4 id="write-ext"><a class="anchor hidden-xs" href="#write-ext" title="write-ext"><span class="octicon octicon-link"></span></a><strong>write_ext()</strong></h4><ul>
+<li>以<code>writei()</code>為範本的更改，新增了parameter <code>skip</code>，並根據<code>skip</code>來決定是否要複寫<code>child1</code>與<code>child2</code>。</li>
+</ul><pre><code class="clike hljs"><div class="wrapper"><div class="gutter linenumber"><span data-linenumber="1"></span>
+<span data-linenumber="2"></span>
+<span data-linenumber="3"></span>
+<span data-linenumber="4"></span>
+<span data-linenumber="5"></span>
+<span data-linenumber="6"></span>
+<span data-linenumber="7"></span>
+<span data-linenumber="8"></span>
+<span data-linenumber="9"></span>
+<span data-linenumber="10"></span>
+<span data-linenumber="11"></span>
+<span data-linenumber="12"></span>
+<span data-linenumber="13"></span>
+<span data-linenumber="14"></span>
+<span data-linenumber="15"></span>
+<span data-linenumber="16"></span>
+<span data-linenumber="17"></span>
+<span data-linenumber="18"></span></div><div class="code">  <span class="hljs-comment">// 依據skip來判斷是否要連child都去做複寫</span>
+  <span class="hljs-keyword">if</span> (skip == <span class="hljs-number">0</span>) {
+    <span class="hljs-keyword">if</span> (ip-&gt;child1) {
+      ci = iget(ip-&gt;dev, ip-&gt;child1);
+      ilock_ext(ci, <span class="hljs-number">0</span>);
+      <span class="hljs-comment">// 注意呼叫的是writei()而非write_ext()，亦即不會再有複寫，防止無限循環</span>
+      writei(ci, _src, _off, n);
+      iunlock(ci);
+    }
+
+    <span class="hljs-keyword">if</span> (ip-&gt;child2) {
+      ci = iget(ip-&gt;dev, ip-&gt;child2);
+      ilock_ext(ci, <span class="hljs-number">0</span>);
+      <span class="hljs-comment">// 注意呼叫的是writei()而非write_ext()，亦即不會再有複寫，防止無限循環</span>
+      writei(ci, _src, _off, n);
+      iunlock(ci);
+    }
+  }
+</div></div></code></pre><ul>
+<li>寫入前先檢查是否會寫入到不合法的區域，寫入後檢查是否需要更新檔案資訊。</li>
+</ul><pre><code class="clike hljs"><div class="wrapper"><div class="gutter linenumber"><span data-linenumber="1"></span>
+<span data-linenumber="2"></span>
+<span data-linenumber="3"></span>
+<span data-linenumber="4"></span>
+<span data-linenumber="5"></span>
+<span data-linenumber="6"></span>
+<span data-linenumber="7"></span>
+<span data-linenumber="8"></span>
+<span data-linenumber="9"></span>
+<span data-linenumber="10"></span>
+<span data-linenumber="11"></span>
+<span data-linenumber="12"></span>
+<span data-linenumber="13"></span>
+<span data-linenumber="14"></span>
+<span data-linenumber="15"></span></div><div class="code">    <span class="hljs-comment">// 如果是device則另外處理</span>
+    <span class="hljs-keyword">if</span>(ip-&gt;type == T_DEV){
+    <span class="hljs-comment">// 如果是非法的裝置，則回傳-1代表失敗</span>
+    <span class="hljs-keyword">if</span>(ip-&gt;major &lt; <span class="hljs-number">0</span> || ip-&gt;major &gt;= NDEV || !devsw[ip-&gt;major].write)
+      <span class="hljs-keyword">return</span> <span class="hljs-number">-1</span>;
+    <span class="hljs-comment">// 如果是合法的裝置，則就由負責的去寫入</span>
+    <span class="hljs-keyword">return</span> devsw[ip-&gt;major].write(ip, src, n);
+  }
+
+  <span class="hljs-comment">// 如果被寫入的起始位址超過檔案範圍，或者寫入大小為負數，則傳回-1代表失敗</span>
+  <span class="hljs-keyword">if</span>(off &gt; ip-&gt;size || off + n &lt; off)
+    <span class="hljs-keyword">return</span> <span class="hljs-number">-1</span>;
+  <span class="hljs-comment">// 如果寫入後的大小超越最大單檔限制，則傳回-1代表失敗</span>
+  <span class="hljs-keyword">if</span>(off + n &gt; MAXFILE*BSIZE)
+    <span class="hljs-keyword">return</span> <span class="hljs-number">-1</span>;
+</div></div></code></pre><pre><code class="clike hljs"><div class="wrapper"><div class="gutter linenumber"><span data-linenumber="1"></span>
+<span data-linenumber="2"></span>
+<span data-linenumber="3"></span>
+<span data-linenumber="4"></span>
+<span data-linenumber="5"></span>
+<span data-linenumber="6"></span>
+<span data-linenumber="7"></span>
+<span data-linenumber="8"></span>
+<span data-linenumber="9"></span>
+<span data-linenumber="10"></span>
+<span data-linenumber="11"></span></div><div class="code">  <span class="hljs-comment">// ditto block的資訊會由parent更新，所以提早返回</span>
+  <span class="hljs-keyword">if</span> (ip-&gt;type == T_DITTO)
+    <span class="hljs-keyword">return</span> n;
+
+  <span class="hljs-comment">// 若寫入後超過原本大小，則更新大小資訊</span>
+  <span class="hljs-keyword">if</span> (n &gt; <span class="hljs-number">0</span> &amp;&amp; off &gt; ip-&gt;size)
+    ip-&gt;size = off;
+
+  <span class="hljs-comment">// 將修改過後inode寫入disk</span>
+  <span class="hljs-keyword">if</span> (ip-&gt;type != T_DEV)
+    iupdate_ext(ip, skip);
+</div></div></code></pre><p><a href="https://i.imgur.com/cCCr1Ku.jpg" target="_blank"><img src="https://i.imgur.com/cCCr1Ku.jpg" alt=""></a></p><hr><h4 id="writei"><a class="anchor hidden-xs" href="#writei" title="writei"><span class="octicon octicon-link"></span></a><strong>writei()</strong></h4><ul>
+<li>修改使其成為呼叫<code>write_ext()</code>的介面，新增的<code>skip</code>參數預設為<code>0</code>，這樣便與呼叫<code>writei()</code>的結果一樣。</li>
+</ul><p><a href="https://i.imgur.com/sfVZTwN.jpg" target="_blank"><img src="https://i.imgur.com/sfVZTwN.jpg" alt=""></a></p><hr><ul>
+<li>修改<code>namex()</code>、<code>namei()</code>、<code>nameiparent()</code>函式。</li>
+<li>新增<code>namei_ext()</code>、<code>nameiparent_ext()</code>、<code>namei_trans()</code>、<code>nameiparent_trans()</code>函式。</li>
+<li>將<code>namei()</code>、<code>nameiparent()</code>實做移至<code>namei_ext()</code>、<code>nameiparent_ext()</code>函式。</li>
+</ul><h4 id="namex"><a class="anchor hidden-xs" href="#namex" title="namex"><span class="octicon octicon-link"></span></a><strong>namex()</strong></h4><ul>
+<li>為name系列函式的最底層，<code>namei()</code>等就是呼叫不同參數的<code>namex()</code>的介面，實際上根據路徑將<code>inode</code>找出來就是在這邊。</li>
+<li>namei 系列和 nameiparent 系列差別即為 parameter <code>int nameiparent</code>的差別，此參數為<code>1</code>時會提早一層跳出迴圈，藉此得到傳入<code>path</code>的母目錄。</li>
+<li>這邊因為recover的關係，需要使用不同的<code>ilock</code>。</li>
+</ul><pre><code class="clike hljs"><div class="wrapper"><div class="gutter linenumber"><span data-linenumber="1"></span>
+<span data-linenumber="2"></span>
+<span data-linenumber="3"></span>
+<span data-linenumber="4"></span>
+<span data-linenumber="5"></span>
+<span data-linenumber="6"></span></div><div class="code">	<span class="hljs-comment">// 若nameiparent為1，則在結束前一個迴圈unlock ip並跳出</span>
+    <span class="hljs-keyword">if</span>(nameiparent &amp;&amp; *path == <span class="hljs-string">'\0'</span>){
+      <span class="hljs-comment">// 提早離開</span>
+      iunlock(ip);
+      <span class="hljs-keyword">return</span> ip;
+    }
+</div></div></code></pre><pre><code class="clike hljs"><div class="wrapper"><div class="gutter linenumber"><span data-linenumber="1"></span>
+<span data-linenumber="2"></span>
+<span data-linenumber="3"></span>
+<span data-linenumber="4"></span>
+<span data-linenumber="5"></span>
+<span data-linenumber="6"></span></div><div class="code">	<span class="hljs-comment">// 依據trans來判斷要用ilock_trans()還是ilock()</span>
+    <span class="hljs-keyword">if</span> (trans) {
+      <span class="hljs-keyword">if</span> (ilock_trans(ip) != <span class="hljs-number">0</span>) <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;	<span class="hljs-comment">// recover和lock失敗</span>
+    } <span class="hljs-keyword">else</span> {
+      <span class="hljs-keyword">if</span> (ilock(ip) != <span class="hljs-number">0</span>) <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;			<span class="hljs-comment">// lock失敗</span>
+    }
+</div></div></code></pre><p><a href="https://i.imgur.com/NED5zQk.jpg" target="_blank"><img src="https://i.imgur.com/NED5zQk.jpg" alt=""></a></p><hr><h4 id="namei-ext"><a class="anchor hidden-xs" href="#namei-ext" title="namei-ext"><span class="octicon octicon-link"></span></a><strong>namei_ext()</strong></h4><ul>
+<li><code>namei_ext()</code>為因應<code>namex()</code>修改而增加的介面(<code>原為namei()</code>)，預設需要多傳入<code>namex()</code>多了的參數<code>trans</code>。</li>
+</ul><p><a href="https://i.imgur.com/GPBtkfI.jpg" target="_blank"><img src="https://i.imgur.com/GPBtkfI.jpg" alt=""></a></p><hr><h4 id="nameiparent-ext"><a class="anchor hidden-xs" href="#nameiparent-ext" title="nameiparent-ext"><span class="octicon octicon-link"></span></a><strong>nameiparent_ext()</strong></h4><ul>
+<li><code>nameiparent_ext()</code>為因應<code>namex()</code>修改而增加的介面(原為<code>nameiparent()</code>)，預設需要多傳入<code>namex()</code>多了的參數<code>trans</code>。</li>
+</ul><p><a href="https://i.imgur.com/DiPVJEq.jpg" target="_blank"><img src="https://i.imgur.com/DiPVJEq.jpg" alt=""></a></p><hr><h4 id="namei"><a class="anchor hidden-xs" href="#namei" title="namei"><span class="octicon octicon-link"></span></a><strong>namei()</strong></h4><ul>
+<li>因<code>namei()</code>需提供與原本相符的功能，所以必須使<code>namex()</code>的<code>trans=0</code>，也就是呼叫<code>namei_ext()</code>時<code>trans</code>傳入<code>0</code>。</li>
+</ul><p><a href="https://i.imgur.com/NEaZcqA.jpg" target="_blank"><img src="https://i.imgur.com/NEaZcqA.jpg" alt=""></a></p><hr><h4 id="nameiparent"><a class="anchor hidden-xs" href="#nameiparent" title="nameiparent"><span class="octicon octicon-link"></span></a><strong>nameiparent()</strong></h4><ul>
+<li>因<code>nameiparent()</code>需提供與原本相符的功能，所以必須使<code>namex()</code>的<code>trans=0</code>，也就是呼叫nameiparent_ext時<code>trans</code>傳入<code>0</code>。</li>
+</ul><p><a href="https://i.imgur.com/C2jdq5N.jpg" target="_blank"><img src="https://i.imgur.com/C2jdq5N.jpg" alt=""></a></p><hr><h4 id="namei-trans"><a class="anchor hidden-xs" href="#namei-trans" title="namei-trans"><span class="octicon octicon-link"></span></a><strong>namei_trans()</strong></h4><ul>
+<li><code>namei_trans()</code>則與<code>namei()</code>相反，為<code>trans</code>傳入<code>1</code>的版本。</li>
+</ul><p><a href="https://i.imgur.com/dmhKXck.jpg" target="_blank"><img src="https://i.imgur.com/dmhKXck.jpg" alt=""></a></p><hr><h4 id="nameiparent-trans"><a class="anchor hidden-xs" href="#nameiparent-trans" title="nameiparent-trans"><span class="octicon octicon-link"></span></a><strong>nameiparent_trans()</strong></h4><ul>
+<li><code>nameiparent_trans()</code>則與<code>nameiparent()</code>相反，為<code>trans</code>傳入<code>1</code>的版本。</li>
+</ul><p><a href="https://i.imgur.com/3hTpZTk.jpg" target="_blank"><img src="https://i.imgur.com/3hTpZTk.jpg" alt=""></a></p><hr><h4 id="distance-to-root"><a class="anchor hidden-xs" href="#distance-to-root" title="distance-to-root"><span class="octicon octicon-link"></span></a><strong>distance_to_root()</strong></h4><ul>
+<li><code>distance_to_root()</code>為新增的函式，傳入一個合法的<code>path</code>，並利用傳進來的<code>path</code>計算其距離<code>root</code>有多少層，藉以實做3層內2個，或者6層內1個<code>ditto block</code>等功能。</li>
+</ul><pre><code class="clike hljs"><div class="wrapper"><div class="gutter linenumber"><span data-linenumber="1"></span>
+<span data-linenumber="2"></span>
+<span data-linenumber="3"></span>
+<span data-linenumber="4"></span>
+<span data-linenumber="5"></span>
+<span data-linenumber="6"></span>
+<span data-linenumber="7"></span>
+<span data-linenumber="8"></span>
+<span data-linenumber="9"></span>
+<span data-linenumber="10"></span>
+<span data-linenumber="11"></span>
+<span data-linenumber="12"></span>
+<span data-linenumber="13"></span>
+<span data-linenumber="14"></span>
+<span data-linenumber="15"></span>
+<span data-linenumber="16"></span></div><div class="code">    <span class="hljs-comment">// 利用..不斷向上一層爬</span>
+    <span class="hljs-keyword">while</span>((ip = dirlookup(dp,<span class="hljs-string">".."</span>, &amp;off) ) != <span class="hljs-number">0</span>){
+	inum1 = dp-&gt;inum;
+	iunlockput(dp);	<span class="hljs-comment">// 得到父目錄ip，所以紀錄完inum後，dp就不需要，可以解鎖並釋放了</span>
+	dp = ip;
+	ilock_trans(dp);
+	inum2 = dp-&gt;inum;
+	
+	<span class="hljs-comment">// 找到root的話</span>
+	<span class="hljs-keyword">if</span>(inum1 == inum2){
+	    iunlockput(dp);	<span class="hljs-comment">// 解鎖inode並釋放</span>
+	    <span class="hljs-keyword">break</span>;			<span class="hljs-comment">// 已經找到，中止迴圈</span>
+	}
+	counter++;	<span class="hljs-comment">// 沒找到root則counter+1，繼續往上一層找</span>
+	off = <span class="hljs-number">0</span>;
+    }
+</div></div></code></pre><p><a href="https://i.imgur.com/BgKLchQ.jpg" target="_blank"><img src="https://i.imgur.com/BgKLchQ.jpg" alt=""></a></p><hr><h3 id="execc"><a class="anchor hidden-xs" href="#execc" title="execc"><span class="octicon octicon-link"></span></a>exec.c</h3><ul>
 <li>將<code>namei(path)</code>改為<code>namei_trans(path)</code>。</li>
 </ul><pre><code class="clike hljs"><div class="wrapper"><div class="gutter linenumber"><span data-linenumber="1"></span>
 <span data-linenumber="2"></span>
@@ -1084,7 +1254,7 @@ reads <strong>n</strong> blocks in inode <strong>ip</strong> starting from <stro
 
   <span class="hljs-built_in">exit</span>(<span class="hljs-number">0</span>);
 }
-</div></div></code></pre><hr><h4 id="ichecksum1"><a class="anchor hidden-xs" href="#ichecksum1" title="ichecksum1"><span class="octicon octicon-link"></span></a>ichecksum()</h4><p>同<a href="https://hackmd.io/EYRgLAhgxsDsCmBaAnMiATRYAMYkA4IBmZRbZeMdCfAVmzliA===?view#ichecksum" target="_blank">上</a>，不再贅述。</p><pre><code class="clike hljs"><div class="wrapper"><div class="gutter linenumber"><span data-linenumber="1"></span>
+</div></div></code></pre><hr><h4 id="ichecksum"><a class="anchor hidden-xs" href="#ichecksum" title="ichecksum"><span class="octicon octicon-link"></span></a>ichecksum()</h4><p>同<a href="https://hackmd.io/EYRgLAhgxsDsCmBaAnMiATRYAMYkA4IBmZRbZeMdCfAVmzliA===?view#ichecksum" target="_blank">上</a>，不再贅述。</p><pre><code class="clike hljs"><div class="wrapper"><div class="gutter linenumber"><span data-linenumber="1"></span>
 <span data-linenumber="2"></span>
 <span data-linenumber="3"></span>
 <span data-linenumber="4"></span>
@@ -1282,177 +1452,7 @@ reads <strong>n</strong> blocks in inode <strong>ip</strong> starting from <stro
     memset((<span class="hljs-keyword">void</span> *)cbuf, <span class="hljs-number">0</span>, n);	<span class="hljs-comment">// 清空cbuf</span>
   }
 }
-</div></div></code></pre><hr><ul>
-<li>修改<code>writei()</code>函式。</li>
-<li>新增<code>write_ext()</code>函式。</li>
-<li>將<code>writei()</code>實做移至<code>write_ext()</code>函式。</li>
-</ul><h4 id="write-ext"><a class="anchor hidden-xs" href="#write-ext" title="write-ext"><span class="octicon octicon-link"></span></a><strong>write_ext()</strong></h4><ul>
-<li>以<code>writei()</code>為範本的更改，新增了parameter <code>skip</code>，並根據<code>skip</code>來決定是否要複寫<code>child1</code>與<code>child2</code>。</li>
-</ul><pre><code class="clike hljs"><div class="wrapper"><div class="gutter linenumber"><span data-linenumber="1"></span>
-<span data-linenumber="2"></span>
-<span data-linenumber="3"></span>
-<span data-linenumber="4"></span>
-<span data-linenumber="5"></span>
-<span data-linenumber="6"></span>
-<span data-linenumber="7"></span>
-<span data-linenumber="8"></span>
-<span data-linenumber="9"></span>
-<span data-linenumber="10"></span>
-<span data-linenumber="11"></span>
-<span data-linenumber="12"></span>
-<span data-linenumber="13"></span>
-<span data-linenumber="14"></span>
-<span data-linenumber="15"></span>
-<span data-linenumber="16"></span>
-<span data-linenumber="17"></span>
-<span data-linenumber="18"></span></div><div class="code">  <span class="hljs-comment">// 依據skip來判斷是否要連child都去做複寫</span>
-  <span class="hljs-keyword">if</span> (skip == <span class="hljs-number">0</span>) {
-    <span class="hljs-keyword">if</span> (ip-&gt;child1) {
-      ci = iget(ip-&gt;dev, ip-&gt;child1);
-      ilock_ext(ci, <span class="hljs-number">0</span>);
-      <span class="hljs-comment">// 注意呼叫的是writei()而非write_ext()，亦即不會再有複寫，防止無限循環</span>
-      writei(ci, _src, _off, n);
-      iunlock(ci);
-    }
-
-    <span class="hljs-keyword">if</span> (ip-&gt;child2) {
-      ci = iget(ip-&gt;dev, ip-&gt;child2);
-      ilock_ext(ci, <span class="hljs-number">0</span>);
-      <span class="hljs-comment">// 注意呼叫的是writei()而非write_ext()，亦即不會再有複寫，防止無限循環</span>
-      writei(ci, _src, _off, n);
-      iunlock(ci);
-    }
-  }
-</div></div></code></pre><ul>
-<li>寫入前先檢查是否會寫入到不合法的區域，寫入後檢查是否需要更新檔案資訊。</li>
-</ul><pre><code class="clike hljs"><div class="wrapper"><div class="gutter linenumber"><span data-linenumber="1"></span>
-<span data-linenumber="2"></span>
-<span data-linenumber="3"></span>
-<span data-linenumber="4"></span>
-<span data-linenumber="5"></span>
-<span data-linenumber="6"></span>
-<span data-linenumber="7"></span>
-<span data-linenumber="8"></span>
-<span data-linenumber="9"></span>
-<span data-linenumber="10"></span>
-<span data-linenumber="11"></span>
-<span data-linenumber="12"></span>
-<span data-linenumber="13"></span>
-<span data-linenumber="14"></span>
-<span data-linenumber="15"></span></div><div class="code">    <span class="hljs-comment">// 如果是device則另外處理</span>
-    <span class="hljs-keyword">if</span>(ip-&gt;type == T_DEV){
-    <span class="hljs-comment">// 如果是非法的裝置，則回傳-1代表失敗</span>
-    <span class="hljs-keyword">if</span>(ip-&gt;major &lt; <span class="hljs-number">0</span> || ip-&gt;major &gt;= NDEV || !devsw[ip-&gt;major].write)
-      <span class="hljs-keyword">return</span> <span class="hljs-number">-1</span>;
-    <span class="hljs-comment">// 如果是合法的裝置，則就由負責的去寫入</span>
-    <span class="hljs-keyword">return</span> devsw[ip-&gt;major].write(ip, src, n);
-  }
-
-  <span class="hljs-comment">// 如果被寫入的起始位址超過檔案範圍，或者寫入大小為負數，則傳回-1代表失敗</span>
-  <span class="hljs-keyword">if</span>(off &gt; ip-&gt;size || off + n &lt; off)
-    <span class="hljs-keyword">return</span> <span class="hljs-number">-1</span>;
-  <span class="hljs-comment">// 如果寫入後的大小超越最大單檔限制，則傳回-1代表失敗</span>
-  <span class="hljs-keyword">if</span>(off + n &gt; MAXFILE*BSIZE)
-    <span class="hljs-keyword">return</span> <span class="hljs-number">-1</span>;
-</div></div></code></pre><pre><code class="clike hljs"><div class="wrapper"><div class="gutter linenumber"><span data-linenumber="1"></span>
-<span data-linenumber="2"></span>
-<span data-linenumber="3"></span>
-<span data-linenumber="4"></span>
-<span data-linenumber="5"></span>
-<span data-linenumber="6"></span>
-<span data-linenumber="7"></span>
-<span data-linenumber="8"></span>
-<span data-linenumber="9"></span>
-<span data-linenumber="10"></span>
-<span data-linenumber="11"></span></div><div class="code">  <span class="hljs-comment">// ditto block的資訊會由parent更新，所以提早返回</span>
-  <span class="hljs-keyword">if</span> (ip-&gt;type == T_DITTO)
-    <span class="hljs-keyword">return</span> n;
-
-  <span class="hljs-comment">// 若寫入後超過原本大小，則更新大小資訊</span>
-  <span class="hljs-keyword">if</span> (n &gt; <span class="hljs-number">0</span> &amp;&amp; off &gt; ip-&gt;size)
-    ip-&gt;size = off;
-
-  <span class="hljs-comment">// 將修改過後inode寫入disk</span>
-  <span class="hljs-keyword">if</span> (ip-&gt;type != T_DEV)
-    iupdate_ext(ip, skip);
-</div></div></code></pre><p><a href="https://i.imgur.com/cCCr1Ku.jpg" target="_blank"><img src="https://i.imgur.com/cCCr1Ku.jpg" alt=""></a></p><hr><h4 id="writei"><a class="anchor hidden-xs" href="#writei" title="writei"><span class="octicon octicon-link"></span></a><strong>writei()</strong></h4><ul>
-<li>修改使其成為呼叫<code>write_ext()</code>的介面，新增的<code>skip</code>參數預設為<code>0</code>，這樣便與呼叫<code>writei()</code>的結果一樣。</li>
-</ul><p><a href="https://i.imgur.com/sfVZTwN.jpg" target="_blank"><img src="https://i.imgur.com/sfVZTwN.jpg" alt=""></a></p><hr><ul>
-<li>修改<code>namex()</code>、<code>namei()</code>、<code>nameiparent()</code>函式。</li>
-<li>新增<code>namei_ext()</code>、<code>nameiparent_ext()</code>、<code>namei_trans()</code>、<code>nameiparent_trans()</code>函式。</li>
-<li>將<code>namei()</code>、<code>nameiparent()</code>實做移至<code>namei_ext()</code>、<code>nameiparent_ext()</code>函式。</li>
-</ul><h4 id="namex"><a class="anchor hidden-xs" href="#namex" title="namex"><span class="octicon octicon-link"></span></a><strong>namex()</strong></h4><ul>
-<li>為name系列函式的最底層，<code>namei()</code>等就是呼叫不同參數的<code>namex()</code>的介面，實際上根據路徑將<code>inode</code>找出來就是在這邊。</li>
-<li>namei 系列和 nameiparent 系列差別即為 parameter <code>int nameiparent</code>的差別，此參數為<code>1</code>時會提早一層跳出迴圈，藉此得到傳入<code>path</code>的母目錄。</li>
-<li>這邊因為recover的關係，需要使用不同的<code>ilock</code>。</li>
-</ul><pre><code class="clike hljs"><div class="wrapper"><div class="gutter linenumber"><span data-linenumber="1"></span>
-<span data-linenumber="2"></span>
-<span data-linenumber="3"></span>
-<span data-linenumber="4"></span>
-<span data-linenumber="5"></span>
-<span data-linenumber="6"></span></div><div class="code">	<span class="hljs-comment">// 若nameiparent為1，則在結束前一個迴圈unlock ip並跳出</span>
-    <span class="hljs-keyword">if</span>(nameiparent &amp;&amp; *path == <span class="hljs-string">'\0'</span>){
-      <span class="hljs-comment">// 提早離開</span>
-      iunlock(ip);
-      <span class="hljs-keyword">return</span> ip;
-    }
-</div></div></code></pre><pre><code class="clike hljs"><div class="wrapper"><div class="gutter linenumber"><span data-linenumber="1"></span>
-<span data-linenumber="2"></span>
-<span data-linenumber="3"></span>
-<span data-linenumber="4"></span>
-<span data-linenumber="5"></span>
-<span data-linenumber="6"></span></div><div class="code">	<span class="hljs-comment">// 依據trans來判斷要用ilock_trans()還是ilock()</span>
-    <span class="hljs-keyword">if</span> (trans) {
-      <span class="hljs-keyword">if</span> (ilock_trans(ip) != <span class="hljs-number">0</span>) <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;	<span class="hljs-comment">// recover和lock失敗</span>
-    } <span class="hljs-keyword">else</span> {
-      <span class="hljs-keyword">if</span> (ilock(ip) != <span class="hljs-number">0</span>) <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;			<span class="hljs-comment">// lock失敗</span>
-    }
-</div></div></code></pre><p><a href="https://i.imgur.com/NED5zQk.jpg" target="_blank"><img src="https://i.imgur.com/NED5zQk.jpg" alt=""></a></p><hr><h4 id="namei-ext"><a class="anchor hidden-xs" href="#namei-ext" title="namei-ext"><span class="octicon octicon-link"></span></a><strong>namei_ext()</strong></h4><ul>
-<li><code>namei_ext()</code>為因應<code>namex()</code>修改而增加的介面(<code>原為namei()</code>)，預設需要多傳入<code>namex()</code>多了的參數<code>trans</code>。</li>
-</ul><p><a href="https://i.imgur.com/GPBtkfI.jpg" target="_blank"><img src="https://i.imgur.com/GPBtkfI.jpg" alt=""></a></p><hr><h4 id="nameiparent-ext"><a class="anchor hidden-xs" href="#nameiparent-ext" title="nameiparent-ext"><span class="octicon octicon-link"></span></a><strong>nameiparent_ext()</strong></h4><ul>
-<li><code>nameiparent_ext()</code>為因應<code>namex()</code>修改而增加的介面(原為<code>nameiparent()</code>)，預設需要多傳入<code>namex()</code>多了的參數<code>trans</code>。</li>
-</ul><p><a href="https://i.imgur.com/DiPVJEq.jpg" target="_blank"><img src="https://i.imgur.com/DiPVJEq.jpg" alt=""></a></p><hr><h4 id="namei"><a class="anchor hidden-xs" href="#namei" title="namei"><span class="octicon octicon-link"></span></a><strong>namei()</strong></h4><ul>
-<li>因<code>namei()</code>需提供與原本相符的功能，所以必須使<code>namex()</code>的<code>trans=0</code>，也就是呼叫<code>namei_ext()</code>時<code>trans</code>傳入<code>0</code>。</li>
-</ul><p><a href="https://i.imgur.com/NEaZcqA.jpg" target="_blank"><img src="https://i.imgur.com/NEaZcqA.jpg" alt=""></a></p><hr><h4 id="nameiparent"><a class="anchor hidden-xs" href="#nameiparent" title="nameiparent"><span class="octicon octicon-link"></span></a><strong>nameiparent()</strong></h4><ul>
-<li>因<code>nameiparent()</code>需提供與原本相符的功能，所以必須使<code>namex()</code>的<code>trans=0</code>，也就是呼叫nameiparent_ext時<code>trans</code>傳入<code>0</code>。</li>
-</ul><p><a href="https://i.imgur.com/C2jdq5N.jpg" target="_blank"><img src="https://i.imgur.com/C2jdq5N.jpg" alt=""></a></p><hr><h4 id="namei-trans"><a class="anchor hidden-xs" href="#namei-trans" title="namei-trans"><span class="octicon octicon-link"></span></a><strong>namei_trans()</strong></h4><ul>
-<li><code>namei_trans()</code>則與<code>namei()</code>相反，為<code>trans</code>傳入<code>1</code>的版本。</li>
-</ul><p><a href="https://i.imgur.com/dmhKXck.jpg" target="_blank"><img src="https://i.imgur.com/dmhKXck.jpg" alt=""></a></p><hr><h4 id="nameiparent-trans"><a class="anchor hidden-xs" href="#nameiparent-trans" title="nameiparent-trans"><span class="octicon octicon-link"></span></a><strong>nameiparent_trans()</strong></h4><ul>
-<li><code>nameiparent_trans()</code>則與<code>nameiparent()</code>相反，為<code>trans</code>傳入<code>1</code>的版本。</li>
-</ul><p><a href="https://i.imgur.com/3hTpZTk.jpg" target="_blank"><img src="https://i.imgur.com/3hTpZTk.jpg" alt=""></a></p><hr><h4 id="distance-to-root"><a class="anchor hidden-xs" href="#distance-to-root" title="distance-to-root"><span class="octicon octicon-link"></span></a><strong>distance_to_root()</strong></h4><ul>
-<li><code>distance_to_root()</code>為新增的函式，傳入一個合法的<code>path</code>，並利用傳進來的<code>path</code>計算其距離<code>root</code>有多少層，藉以實做3層內2個，或者6層內1個<code>ditto block</code>等功能。</li>
-</ul><pre><code class="clike hljs"><div class="wrapper"><div class="gutter linenumber"><span data-linenumber="1"></span>
-<span data-linenumber="2"></span>
-<span data-linenumber="3"></span>
-<span data-linenumber="4"></span>
-<span data-linenumber="5"></span>
-<span data-linenumber="6"></span>
-<span data-linenumber="7"></span>
-<span data-linenumber="8"></span>
-<span data-linenumber="9"></span>
-<span data-linenumber="10"></span>
-<span data-linenumber="11"></span>
-<span data-linenumber="12"></span>
-<span data-linenumber="13"></span>
-<span data-linenumber="14"></span>
-<span data-linenumber="15"></span>
-<span data-linenumber="16"></span></div><div class="code">    <span class="hljs-comment">// 利用..不斷向上一層爬</span>
-    <span class="hljs-keyword">while</span>((ip = dirlookup(dp,<span class="hljs-string">".."</span>, &amp;off) ) != <span class="hljs-number">0</span>){
-	inum1 = dp-&gt;inum;
-	iunlockput(dp);	<span class="hljs-comment">// 得到父目錄ip，所以紀錄完inum後，dp就不需要，可以解鎖並釋放了</span>
-	dp = ip;
-	ilock_trans(dp);
-	inum2 = dp-&gt;inum;
-	
-	<span class="hljs-comment">// 找到root的話</span>
-	<span class="hljs-keyword">if</span>(inum1 == inum2){
-	    iunlockput(dp);	<span class="hljs-comment">// 解鎖inode並釋放</span>
-	    <span class="hljs-keyword">break</span>;			<span class="hljs-comment">// 已經找到，中止迴圈</span>
-	}
-	counter++;	<span class="hljs-comment">// 沒找到root則counter+1，繼續往上一層找</span>
-	off = <span class="hljs-number">0</span>;
-    }
-</div></div></code></pre><p><a href="https://i.imgur.com/BgKLchQ.jpg" target="_blank"><img src="https://i.imgur.com/BgKLchQ.jpg" alt=""></a></p><hr><h2 id="syscall-handler"><a class="anchor hidden-xs" href="#syscall-handler" title="syscall-handler"><span class="octicon octicon-link"></span></a>Syscall Handler</h2><h3 id="usyss"><a class="anchor hidden-xs" href="#usyss" title="usyss"><span class="octicon octicon-link"></span></a>usys.s</h3><ul>
+</div></div></code></pre><hr><h2 id="syscall-handler"><a class="anchor hidden-xs" href="#syscall-handler" title="syscall-handler"><span class="octicon octicon-link"></span></a>Syscall Handler</h2><h3 id="usyss"><a class="anchor hidden-xs" href="#usyss" title="usyss"><span class="octicon octicon-link"></span></a>usys.s</h3><ul>
 <li>新增syscall：
 <ul>
 <li>iopen</li>
@@ -1559,7 +1559,7 @@ reads <strong>n</strong> blocks in inode <strong>ip</strong> starting from <stro
 <li>在原有檔案無法開啟的錯誤訊息中，新增CORRUPTED的提示。</li>
 <li>開啟檔案輸出訊息新增child1、child2、checksum值。</li>
 </ul><h2 id="tip35"><a class="anchor hidden-xs" href="#" title=""><span class="octicon octicon-link"></span></a><img src="https://i.imgur.com/EuXju47.png" alt=""></h2><hr><h3 id="新增-user-command-實作及使用"><a class="anchor hidden-xs" href="#新增-user-command-實作及使用" title="新增-user-command-實作及使用"><span class="octicon octicon-link"></span></a>新增 User Command 實作及使用</h3><h4 id="1-idesignatec"><a class="anchor hidden-xs" href="#1-idesignatec" title="1-idesignatec"><span class="octicon octicon-link"></span></a>1. idesignate.c</h4><ul>
-<li>Usage：idesignate [path][improtance]
+<li>Usage：idesignate [path] [improtance]
 <ul>
 <li><code>improtance</code>：可為 1 or 2。</li>
 <li>功用：允許使用者以透過此指令將檔案標記為 “重要”，並選擇使用 1 或 2 個 ditto blocks 保護文件。</li>
@@ -1577,7 +1577,7 @@ reads <strong>n</strong> blocks in inode <strong>ip</strong> starting from <stro
     r = duplicate(argv[<span class="hljs-number">1</span>], atoi(argv[<span class="hljs-number">2</span>]));
 }
 </div></div></code></pre><h2 id="tip37"><a class="anchor hidden-xs" href="#" title=""><span class="octicon octicon-link"></span></a><img src="https://i.imgur.com/1yHLHY9.png" alt=""></h2><h4 id="2-pchecksumc"><a class="anchor hidden-xs" href="#2-pchecksumc" title="2-pchecksumc"><span class="octicon octicon-link"></span></a>2. pchecksum.c</h4><ul>
-<li>Usage：pchecksum [devNumber][iNodeNumber]。
+<li>Usage：pchecksum [devNumber] [iNodeNumber]。
 <ul>
 <li><code>devNumber</code>：通常為1。</li>
 <li><code>iNodeNumber</code>：可使用ls得知。</li>
@@ -1598,7 +1598,7 @@ iint = atoi(inum)
     <span class="hljs-comment">//輸出該inode的ichecksum值</span>
     <span class="hljs-built_in">printf</span>(<span class="hljs-number">1</span>, <span class="hljs-string">"%d  %d:  %x\n"</span>, dev, iint, checksum)
 </div></div></code></pre><h2 id="tip38"><a class="anchor hidden-xs" href="#" title=""><span class="octicon octicon-link"></span></a><img src="https://i.imgur.com/fdW4uNF.png" alt=""></h2><h4 id="3-pinodec"><a class="anchor hidden-xs" href="#3-pinodec" title="3-pinodec"><span class="octicon octicon-link"></span></a>3. pinode.c</h4><ul>
-<li>Usage：pinode [devNumber][iNodeNumber]。
+<li>Usage：pinode [devNumber] [iNodeNumber]。
 <ul>
 <li><code>devNumber</code>：通常為1。</li>
 <li><code>iNodeNumber</code>：可使用ls得知。</li>
@@ -1661,13 +1661,13 @@ iint = atoi(inum)
 </ul>
 <p><img src="https://i.imgur.com/ARARfGO.png" alt=""></p>
 </li>
-</ul><hr><h1 id="😎-結論"><a class="anchor hidden-xs" href="#😎-結論" title="😎-結論"><span class="octicon octicon-link"></span></a>😎 結論</h1><p>本來這次的實做宗旨是為了增加file system的安全機制，結果卻多次被xv6 code中原有的安全檢查給提示自己的修改錯誤，讓我明白file system牽一髮而動全身，實做起來相當不易，也讓我認識到了作業系統之精妙與其心細。</p><p>透過這次實做file system的安全備份功能ditto block，我明白了為了提高安全性，勢必得有一些犧牲，除了備份需要犧牲額外的空間外，也需要為了dittoblock而減少原本的最大定址數量。真的是做了才知道，讓我學習到了很多，也進一步明白現今的作業系統是多少人智慧的結晶。</p><hr><h1 id="📅-組員分工"><a class="anchor hidden-xs" href="#📅-組員分工" title="📅-組員分工"><span class="octicon octicon-link"></span></a>📅 組員分工</h1><div class="alert alert-success">
+</ul><hr><h1 id="😎-結論"><a class="anchor hidden-xs" href="#😎-結論" title="😎-結論"><span class="octicon octicon-link"></span></a>😎 結論</h1><p>本來這次的實做宗旨是為了增加 file system 的安全機制，結果卻多次被 xv6 code 中原有的安全檢查給提示自己的修改錯誤，讓我明白 file system 牽一髮而動全身，實做起來相當不易，也讓我認識到了作業系統之精妙與其心細。</p><p>透過這次實做 file system 的安全備份功能 ditto block，我明白了為了提高安全性，勢必得有一些犧牲，除了備份需要犧牲額外的空間外，也需要為了 dittoblock 而減少原本的最大定址數量。真的是做了才知道，讓我學習到了很多，也進一步明白現今的作業系統是多少人智慧的結晶。</p><hr><h1 id="📅-組員分工"><a class="anchor hidden-xs" href="#📅-組員分工" title="📅-組員分工"><span class="octicon octicon-link"></span></a>📅 組員分工</h1><div class="alert alert-success">
 <table>
 <thead>
 <tr>
 <th>組員＼工作</th>
-<th>Kernal</th>
-<th>Syscall</th>
+<th>kernal</th>
+<th>Syacall</th>
 <th>C libary</th>
 <th>Applicaion</th>
 </tr>
@@ -1703,12 +1703,12 @@ iint = atoi(inum)
                 <i class="fa fa-bars"></i>
             </a>
             <ul id="ui-toc" class="ui-toc-dropdown dropdown-menu" aria-labelledby="tocLabel">
-                <div class="toc"><ul class="nav"><li class=""><a href="#106-os-homework-2-2-成果報告書">106 OS homework 2-2 成果報告書</a></li><li class=""><a href="#🙂-使用情境說明包含流程圖">🙂 使用情境說明(包含流程圖)</a></li><li class=""><a href="#😇-成功畫面">😇 成功畫面</a></li><li class=""><a href="#🏃-實作過程修改哪些檔案含圖片">🏃 實作過程(修改哪些檔案[含圖片])</a><ul class="nav"><li class=""><a href="#kernal">Kernal</a><ul class="nav"><li><a href="#stath">stat.h</a></li><li><a href="#paramh">param.h</a></li><li><a href="#fileh">file.h</a></li><li class=""><a href="#fsh">fs.h</a></li><li class=""><a href="#fsc">fs.c</a></li><li class=""><a href="#execc">exec.c</a></li><li><a href="#filec">file.c</a></li><li class=""><a href="#mkfsc">mkfs.c</a></li></ul></li><li class=""><a href="#syscall-handler">Syscall Handler</a><ul class="nav"><li class=""><a href="#usyss">usys.s</a></li></ul></li><li class=""><a href="#tip15"></a><ul class="nav"><li class=""><a href="#syscallc">syscall.c</a></li></ul></li><li class=""><a href="#tip17"></a><ul class="nav"><li class=""><a href="#sysfilec">sysfile.c</a></li></ul></li><li class=""><a href="#tip19"></a></li><li class=""><a href="#tip20"></a></li><li class=""><a href="#tip21"></a><ul class="nav"><li><a href="#procc">proc.c</a></li></ul></li><li class=""><a href="#tip23"></a></li><li><a href="#c-library">C Library</a><ul class="nav"><li><a href="#catc">cat.c</a></li></ul></li><li><a href="#tip26"></a><ul class="nav"><li><a href="#userh">user.h</a></li></ul></li><li class=""><a href="#tip28"></a><ul class="nav"><li class=""><a href="#ulibc">ulib.c</a></li></ul></li><li><a href="#tip30"></a></li><li><a href="#application">Application</a><ul class="nav"><li><a href="#shc">sh.c</a></li></ul></li><li class=""><a href="#tip33"></a><ul class="nav"><li class=""><a href="#lsc">ls.c</a></li></ul></li><li class=""><a href="#tip35"></a><ul class="nav"><li><a href="#新增-user-command-實作及使用">新增 User Command 實作及使用</a></li></ul></li><li class=""><a href="#tip37"></a></li><li class=""><a href="#tip38"></a></li><li class=""><a href="#tip39"></a></li><li class=""><a href="#tip40"></a></li></ul></li><li><a href="#😎-結論">😎 結論</a></li><li><a href="#📅-組員分工">📅 組員分工</a></li></ul></div><div class="toc-menu"><a class="expand-toggle" href="#">Expand all</a><a class="back-to-top" href="#">Back to top</a><a class="go-to-bottom" href="#">Go to bottom</a></div>
+                <div class="toc"><ul class="nav"><li class=""><a href="#106-os-homework-2-2-成果報告書">106 OS homework 2-2 成果報告書</a></li><li class=""><a href="#🙂-使用情境說明包含流程圖">🙂 使用情境說明(包含流程圖)</a></li><li class=""><a href="#😇-成功畫面">😇 成功畫面</a></li><li class=""><a href="#🏃-實作過程修改哪些檔案含圖片">🏃 實作過程(修改哪些檔案[含圖片])</a><ul class="nav"><li class=""><a href="#kernal">Kernal</a><ul class="nav"><li class=""><a href="#stath">stat.h</a></li><li><a href="#paramh">param.h</a></li><li class=""><a href="#fileh">file.h</a></li><li class=""><a href="#fsh">fs.h</a></li><li class=""><a href="#fsc">fs.c</a></li><li class=""><a href="#execc">exec.c</a></li><li class=""><a href="#filec">file.c</a></li><li class=""><a href="#mkfsc">mkfs.c</a></li></ul></li><li class=""><a href="#syscall-handler">Syscall Handler</a><ul class="nav"><li class=""><a href="#usyss">usys.s</a></li></ul></li><li><a href="#tip15"></a><ul class="nav"><li><a href="#syscallc">syscall.c</a></li></ul></li><li><a href="#tip17"></a><ul class="nav"><li><a href="#sysfilec">sysfile.c</a></li></ul></li><li><a href="#tip19"></a></li><li><a href="#tip20"></a></li><li><a href="#tip21"></a><ul class="nav"><li><a href="#procc">proc.c</a></li></ul></li><li><a href="#tip23"></a></li><li><a href="#c-library">C Library</a><ul class="nav"><li><a href="#catc">cat.c</a></li></ul></li><li><a href="#tip26"></a><ul class="nav"><li><a href="#userh">user.h</a></li></ul></li><li><a href="#tip28"></a><ul class="nav"><li><a href="#ulibc">ulib.c</a></li></ul></li><li><a href="#tip30"></a></li><li><a href="#application">Application</a><ul class="nav"><li><a href="#shc">sh.c</a></li></ul></li><li><a href="#tip33"></a><ul class="nav"><li><a href="#lsc">ls.c</a></li></ul></li><li><a href="#tip35"></a><ul class="nav"><li><a href="#新增-user-command-實作及使用">新增 User Command 實作及使用</a></li></ul></li><li><a href="#tip37"></a></li><li><a href="#tip38"></a></li><li><a href="#tip39"></a></li><li><a href="#tip40"></a></li></ul></li><li><a href="#😎-結論">😎 結論</a></li><li><a href="#📅-組員分工">📅 組員分工</a></li></ul></div><div class="toc-menu"><a class="expand-toggle" href="#">Expand all</a><a class="back-to-top" href="#">Back to top</a><a class="go-to-bottom" href="#">Go to bottom</a></div>
             </ul>
         </div>
     </div>
     <div id="ui-toc-affix" class="ui-affix-toc ui-toc-dropdown unselectable hidden-print" data-spy="affix" style="top:17px;display:none;"  >
-        <div class="toc"><ul class="nav"><li class=""><a href="#106-os-homework-2-2-成果報告書">106 OS homework 2-2 成果報告書</a></li><li class=""><a href="#🙂-使用情境說明包含流程圖">🙂 使用情境說明(包含流程圖)</a></li><li class=""><a href="#😇-成功畫面">😇 成功畫面</a></li><li class=""><a href="#🏃-實作過程修改哪些檔案含圖片">🏃 實作過程(修改哪些檔案[含圖片])</a><ul class="nav"><li class=""><a href="#kernal">Kernal</a><ul class="nav"><li><a href="#stath">stat.h</a></li><li><a href="#paramh">param.h</a></li><li><a href="#fileh">file.h</a></li><li class=""><a href="#fsh">fs.h</a></li><li class=""><a href="#fsc">fs.c</a></li><li class=""><a href="#execc">exec.c</a></li><li><a href="#filec">file.c</a></li><li class=""><a href="#mkfsc">mkfs.c</a></li></ul></li><li class=""><a href="#syscall-handler">Syscall Handler</a><ul class="nav"><li class=""><a href="#usyss">usys.s</a></li></ul></li><li class=""><a href="#tip15"></a><ul class="nav"><li class=""><a href="#syscallc">syscall.c</a></li></ul></li><li class=""><a href="#tip17"></a><ul class="nav"><li class=""><a href="#sysfilec">sysfile.c</a></li></ul></li><li class=""><a href="#tip19"></a></li><li class=""><a href="#tip20"></a></li><li class=""><a href="#tip21"></a><ul class="nav"><li><a href="#procc">proc.c</a></li></ul></li><li class=""><a href="#tip23"></a></li><li><a href="#c-library">C Library</a><ul class="nav"><li><a href="#catc">cat.c</a></li></ul></li><li><a href="#tip26"></a><ul class="nav"><li><a href="#userh">user.h</a></li></ul></li><li class=""><a href="#tip28"></a><ul class="nav"><li class=""><a href="#ulibc">ulib.c</a></li></ul></li><li><a href="#tip30"></a></li><li><a href="#application">Application</a><ul class="nav"><li><a href="#shc">sh.c</a></li></ul></li><li class=""><a href="#tip33"></a><ul class="nav"><li class=""><a href="#lsc">ls.c</a></li></ul></li><li class=""><a href="#tip35"></a><ul class="nav"><li><a href="#新增-user-command-實作及使用">新增 User Command 實作及使用</a></li></ul></li><li class=""><a href="#tip37"></a></li><li class=""><a href="#tip38"></a></li><li class=""><a href="#tip39"></a></li><li class=""><a href="#tip40"></a></li></ul></li><li><a href="#😎-結論">😎 結論</a></li><li><a href="#📅-組員分工">📅 組員分工</a></li></ul></div><div class="toc-menu"><a class="expand-toggle" href="#">Expand all</a><a class="back-to-top" href="#">Back to top</a><a class="go-to-bottom" href="#">Go to bottom</a></div>
+        <div class="toc"><ul class="nav"><li class=""><a href="#106-os-homework-2-2-成果報告書">106 OS homework 2-2 成果報告書</a></li><li class=""><a href="#🙂-使用情境說明包含流程圖">🙂 使用情境說明(包含流程圖)</a></li><li class=""><a href="#😇-成功畫面">😇 成功畫面</a></li><li class=""><a href="#🏃-實作過程修改哪些檔案含圖片">🏃 實作過程(修改哪些檔案[含圖片])</a><ul class="nav"><li class=""><a href="#kernal">Kernal</a><ul class="nav"><li class=""><a href="#stath">stat.h</a></li><li><a href="#paramh">param.h</a></li><li class=""><a href="#fileh">file.h</a></li><li class=""><a href="#fsh">fs.h</a></li><li class=""><a href="#fsc">fs.c</a></li><li class=""><a href="#execc">exec.c</a></li><li class=""><a href="#filec">file.c</a></li><li class=""><a href="#mkfsc">mkfs.c</a></li></ul></li><li class=""><a href="#syscall-handler">Syscall Handler</a><ul class="nav"><li class=""><a href="#usyss">usys.s</a></li></ul></li><li><a href="#tip15"></a><ul class="nav"><li><a href="#syscallc">syscall.c</a></li></ul></li><li><a href="#tip17"></a><ul class="nav"><li><a href="#sysfilec">sysfile.c</a></li></ul></li><li><a href="#tip19"></a></li><li><a href="#tip20"></a></li><li><a href="#tip21"></a><ul class="nav"><li><a href="#procc">proc.c</a></li></ul></li><li><a href="#tip23"></a></li><li><a href="#c-library">C Library</a><ul class="nav"><li><a href="#catc">cat.c</a></li></ul></li><li><a href="#tip26"></a><ul class="nav"><li><a href="#userh">user.h</a></li></ul></li><li><a href="#tip28"></a><ul class="nav"><li><a href="#ulibc">ulib.c</a></li></ul></li><li><a href="#tip30"></a></li><li><a href="#application">Application</a><ul class="nav"><li><a href="#shc">sh.c</a></li></ul></li><li><a href="#tip33"></a><ul class="nav"><li><a href="#lsc">ls.c</a></li></ul></li><li><a href="#tip35"></a><ul class="nav"><li><a href="#新增-user-command-實作及使用">新增 User Command 實作及使用</a></li></ul></li><li><a href="#tip37"></a></li><li><a href="#tip38"></a></li><li><a href="#tip39"></a></li><li><a href="#tip40"></a></li></ul></li><li><a href="#😎-結論">😎 結論</a></li><li><a href="#📅-組員分工">📅 組員分工</a></li></ul></div><div class="toc-menu"><a class="expand-toggle" href="#">Expand all</a><a class="back-to-top" href="#">Back to top</a><a class="go-to-bottom" href="#">Go to bottom</a></div>
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha256-U5ZEeKfGNOja007MMD3YBI0A3OSZOQbeG6z2f2Y0hu8=" crossorigin="anonymous" defer></script>
