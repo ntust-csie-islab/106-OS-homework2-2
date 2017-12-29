@@ -53,12 +53,22 @@ github: <a href="https://github.com/bamdart/xv6-public" target="_blank">https://
 </li>
 </ol><p>function call的流程 - 以lsproc為例<br>
 <img src="https://i.imgur.com/bnXMQmy.jpg" alt=""></p><hr><h1 id="😇-成功畫面" style=""><a class="anchor hidden-xs" href="#😇-成功畫面" title="😇-成功畫面"><span class="octicon octicon-link"></span></a>😇 成功畫面</h1><ul>
-<li>使用foo 新增proccess<br>
-<img src="https://i.imgur.com/QHoPtCf.png" alt=""></li>
-<li>輸入suspend，進入suspend狀態，所有proccess進入sleep。此時輸入任何指令都不會有反應。<br>
-<img src="https://i.imgur.com/X2mAKc0.png" alt=""></li>
-<li>在suspend狀態，按下ctrl + w 即可喚醒系統，所有proccess回復到sleep前的狀態(pmwakeup())。<br>
-<img src="https://i.imgur.com/4kwEtux.png" alt=""></li>
+<li>
+<p>使用foo 新增proccess<br>
+<img src="https://i.imgur.com/QHoPtCf.png" alt=""></p>
+</li>
+<li>
+<p>輸入suspend，進入suspend狀態，所有proccess進入sleep。<br>
+<img src="https://i.imgur.com/X2mAKc0.png" alt=""></p>
+<ul>
+<li>此時輸入任何指令不會有反應。<br>
+<img src="https://i.imgur.com/rm5b7Gd.png" alt=""></li>
+</ul>
+</li>
+<li>
+<p>在suspend狀態，按下ctrl + w 即可喚醒系統，所有proccess回復到sleep前的狀態(pmwakeup())。<br>
+<img src="https://i.imgur.com/4kwEtux.png" alt=""></p>
+</li>
 </ul><hr><h1 id="🏃-實作過程修改哪些檔案含圖片" style=""><a class="anchor hidden-xs" href="#🏃-實作過程修改哪些檔案含圖片" title="🏃-實作過程修改哪些檔案含圖片"><span class="octicon octicon-link"></span></a>🏃 實作過程(修改哪些檔案[含圖片])</h1><ul>
 <li>
 <p>總共增加了以下 system call：</p>
@@ -190,7 +200,7 @@ github: <a href="https://github.com/bamdart/xv6-public" target="_blank">https://
 <img src="https://i.imgur.com/1scmhhY.png" alt=""></li>
 </ul>
 </li>
-</ul><hr><h1 id="😎-結論" style=""><a class="anchor hidden-xs" href="#😎-結論" title="😎-結論"><span class="octicon octicon-link"></span></a>😎 結論</h1><p>在這次的project中，我們花了不少的時間研究、trace xv6這個小型的作業系統，發現其中不只有C語言更有用到不少組合語言，也因此讓短短的程式碼變得更難以理解，若想清楚的了解其中如何運作，必須有相當好的C語言與組合語言基礎，不然則需要花非常多的時間去理解。</p><p>這次我們實作功能的途中，也遭遇到了許多困難，常常修改一、兩行程式碼，就會使xv6的運作出現error，我們也因此了解到，在實作作業系統的過程中，需要考慮的環節非常多，code之間常常牽一髮而動全身，稍有不慎就會不小心使OS在某些部分出錯，所以在做各種更動之前，都需要謹慎思量各種可能的影響，才有辦法順利的進行修改。</p><h1 id="📅-組員分工" style=""><a class="anchor hidden-xs" href="#📅-組員分工" title="📅-組員分工"><span class="octicon octicon-link"></span></a>📅 組員分工</h1><ul>
+</ul><hr><h1 id="😎-結論" style=""><a class="anchor hidden-xs" href="#😎-結論" title="😎-結論"><span class="octicon octicon-link"></span></a>😎 結論</h1><p>在這次的project中，我們花了不少的時間研究、trace xv6這個小型的作業系統，發現其中不只有C語言更有用到不少組合語言，也因此讓短短的程式碼變得更難以理解，若想清楚的了解其中如何運作，必須有相當好的C語言與組合語言基礎，不然則需要花非常多的時間去理解。</p><p>這次我們實作功能的途中，也遭遇到了許多困難，常常修改一、兩行程式碼，就會使xv6的運作出現error，我們也因此了解到，在實作作業系統的過程中，需要考慮的環節非常多，code之間常常牽一髮而動全身，稍有不慎就會不小心使OS在某些部分出錯，所以在做各種更動之前，都需要謹慎思量各種可能的影響，才有辦法順利的進行修改。</p><hr><h1 id="📅-組員分工" style=""><a class="anchor hidden-xs" href="#📅-組員分工" title="📅-組員分工"><span class="octicon octicon-link"></span></a>📅 組員分工</h1><ul>
 <li>B10415002 余福浩
 <ul>
 <li>查詢如何實作、trace code、系統實作</li>
@@ -206,19 +216,19 @@ github: <a href="https://github.com/bamdart/xv6-public" target="_blank">https://
 <li>查詢如何實作、trace code、測試&amp;build、報告書製作</li>
 </ul>
 </li>
-</ul></div>
+</ul><hr><div class="resize-sensor" style="position: absolute; left: 0px; top: 0px; right: 0px; bottom: 0px; overflow: hidden; z-index: -1; visibility: hidden;"><div class="resize-sensor-expand" style="position: absolute; left: 0; top: 0; right: 0; bottom: 0; overflow: hidden; z-index: -1; visibility: hidden;"><div style="position: absolute; left: 0px; top: 0px; transition: 0s; width: 100000px; height: 100000px;"></div></div><div class="resize-sensor-shrink" style="position: absolute; left: 0; top: 0; right: 0; bottom: 0; overflow: hidden; z-index: -1; visibility: hidden;"><div style="position: absolute; left: 0; top: 0; transition: 0s; width: 200%; height: 200%"></div></div></div></div>
     <div class="ui-toc dropup unselectable hidden-print" style="display:none;">
         <div class="pull-right dropdown">
             <a id="tocLabel" class="ui-toc-label btn btn-default" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false" title="Table of content">
                 <i class="fa fa-bars"></i>
             </a>
             <ul id="ui-toc" class="ui-toc-dropdown dropdown-menu" aria-labelledby="tocLabel">
-                <div class="toc"><ul class="nav"><li class=""><a href="#106-os-homework-2-2-成果報告書">106 OS homework 2-2 成果報告書</a></li><li><a href="#🙂-使用情境說明包含流程圖">🙂 使用情境說明(包含流程圖)</a></li><li><a href="#😇-成功畫面">😇 成功畫面</a></li><li><a href="#🏃-實作過程修改哪些檔案含圖片">🏃 實作過程(修改哪些檔案[含圖片])</a></li><li><a href="#😎-結論">😎 結論</a></li><li><a href="#📅-組員分工">📅 組員分工</a></li></ul></div><div class="toc-menu"><a class="expand-toggle" href="#">Expand all</a><a class="back-to-top" href="#">Back to top</a><a class="go-to-bottom" href="#">Go to bottom</a></div>
+                <div class="toc"><ul class="nav"><li class=""><a href="#106-os-homework-2-2-成果報告書">106 OS homework 2-2 成果報告書</a></li><li class=""><a href="#🙂-使用情境說明包含流程圖">🙂 使用情境說明(包含流程圖)</a></li><li><a href="#😇-成功畫面">😇 成功畫面</a></li><li><a href="#🏃-實作過程修改哪些檔案含圖片">🏃 實作過程(修改哪些檔案[含圖片])</a></li><li><a href="#😎-結論">😎 結論</a></li><li><a href="#📅-組員分工">📅 組員分工</a></li></ul></div><div class="toc-menu"><a class="expand-toggle" href="#">Expand all</a><a class="back-to-top" href="#">Back to top</a><a class="go-to-bottom" href="#">Go to bottom</a></div>
             </ul>
         </div>
     </div>
     <div id="ui-toc-affix" class="ui-affix-toc ui-toc-dropdown unselectable hidden-print" data-spy="affix" style="top:17px;display:none;"  >
-        <div class="toc"><ul class="nav"><li class=""><a href="#106-os-homework-2-2-成果報告書">106 OS homework 2-2 成果報告書</a></li><li><a href="#🙂-使用情境說明包含流程圖">🙂 使用情境說明(包含流程圖)</a></li><li><a href="#😇-成功畫面">😇 成功畫面</a></li><li><a href="#🏃-實作過程修改哪些檔案含圖片">🏃 實作過程(修改哪些檔案[含圖片])</a></li><li><a href="#😎-結論">😎 結論</a></li><li><a href="#📅-組員分工">📅 組員分工</a></li></ul></div><div class="toc-menu"><a class="expand-toggle" href="#">Expand all</a><a class="back-to-top" href="#">Back to top</a><a class="go-to-bottom" href="#">Go to bottom</a></div>
+        <div class="toc"><ul class="nav"><li class=""><a href="#106-os-homework-2-2-成果報告書">106 OS homework 2-2 成果報告書</a></li><li class=""><a href="#🙂-使用情境說明包含流程圖">🙂 使用情境說明(包含流程圖)</a></li><li><a href="#😇-成功畫面">😇 成功畫面</a></li><li><a href="#🏃-實作過程修改哪些檔案含圖片">🏃 實作過程(修改哪些檔案[含圖片])</a></li><li><a href="#😎-結論">😎 結論</a></li><li><a href="#📅-組員分工">📅 組員分工</a></li></ul></div><div class="toc-menu"><a class="expand-toggle" href="#">Expand all</a><a class="back-to-top" href="#">Back to top</a><a class="go-to-bottom" href="#">Go to bottom</a></div>
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha256-U5ZEeKfGNOja007MMD3YBI0A3OSZOQbeG6z2f2Y0hu8=" crossorigin="anonymous" defer></script>
