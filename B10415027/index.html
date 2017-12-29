@@ -39,11 +39,12 @@
 <p>組長：B10415023、吳欣樺<br>
 組員：B10415026、林于婷<br>
 組員：B10415027、倪銓川<br>
-github:<a href="https://github.com/winterknow852/xv6-public" target="_blank">https://github.com/winterknow852/xv6-public</a></p>
-</blockquote><hr><h1 id="🙂-使用情境說明包含流程圖"><a class="anchor hidden-xs" href="#🙂-使用情境說明包含流程圖" title="🙂-使用情境說明包含流程圖"><span class="octicon octicon-link"></span></a>🙂 使用情境說明(包含流程圖)</h1><p><img src="https://i.imgur.com/UUj5mvJ.png" alt=""></p><p><img src="https://i.imgur.com/FMQqtFp.jpg" alt=""></p><p>補充說明:<br>
-使用allocproc function將Process加入ptable中，$ps 即是創造一個新的process，之後重複執行schedular function，執行步驟如流程圖所述；下面那張圖是其他command的功能。</p><hr><h1 id="😇-成功畫面"><a class="anchor hidden-xs" href="#😇-成功畫面" title="😇-成功畫面"><span class="octicon octicon-link"></span></a>😇 成功畫面</h1><p>一開始priority都設為3，alarm在cpu開始跑時開始alarmtest starting，由我們設定的會印出.時間跑了10個cpu tick時就會印出alarm!並換行繼續<br>
-<img src="https://i.imgur.com/jf4ealf.png" alt=""></p><p>呼叫測試數值foo，依據我們設定的值parent會fork出child，child的priority我們都預設為10<br>
-<img src="https://i.imgur.com/Pp7IRu8.png" alt=""></p><p>接下來我們就能自己輸入修改他的priority，輸入ch 10 5 就能把pid10的foo的priority從原本的10設成5，也可以看到pid10一直在RUNNING的狀態，因為他有最高的priority。<br>
+github:<a href="https://github.com/a920394/xv6-public" target="_blank">https://github.com/a920394/xv6-public</a></p>
+</blockquote><hr><h1 id="🙂-使用情境說明包含流程圖"><a class="anchor hidden-xs" href="#🙂-使用情境說明包含流程圖" title="🙂-使用情境說明包含流程圖"><span class="octicon octicon-link"></span></a>🙂 使用情境說明(包含流程圖)</h1><p><img src="https://i.imgur.com/UUj5mvJ.png" alt=""></p><p><img src="https://i.imgur.com/FMQqtFp.jpg" alt=""><br>
+<img src="https://i.imgur.com/XAAnu2j.png" alt=""></p><p>補充說明:<br>
+使用allocproc function將Process加入ptable中，$ps 即是輸出現有process的狀態，輸入指令＄foo會去呼叫我們內部新增的function foo.c，會新增新的children。上圖是scheduler執行步驟流程圖；下圖是新增功能說明圖示。</p><hr><h1 id="😇-成功畫面"><a class="anchor hidden-xs" href="#😇-成功畫面" title="😇-成功畫面"><span class="octicon octicon-link"></span></a>😇 成功畫面</h1><p>一開始priority都設為3，alarm在cpu開始跑時開始alarmtest starting，由我們設定的會印出"<mark>.</mark>"時間跑了10個cpu tick時就會印出alarm!並換行繼續<br>
+<img src="https://i.imgur.com/jf4ealf.png" alt=""></p><p>呼叫測試數值foo，依據我們設定的值，parent會fork出child，child的priority我們都預設為10<br>
+<img src="https://i.imgur.com/Oopo8lj.png" alt=""></p><p>接下來我們就能自己輸入修改他的priority，輸入ch 10 5 就能把pid10的foo的priority從原本的10設成5，也可以看到pid10一直在RUNNING的狀態，因為他有最高的priority。<br>
 <img src="https://i.imgur.com/B8GQFGw.png" alt=""><br>
 再一次的修改pid10的priority，設為13，可以看到狀態又變回RUNNALBLE，因為pid9的priority比他更高所以先執行，pid9的狀態設為RUNNING。<br>
 <img src="https://i.imgur.com/oqqpGRp.png" alt=""></p><hr><h1 id="🏃-實作過程修改哪些檔案"><a class="anchor hidden-xs" href="#🏃-實作過程修改哪些檔案" title="🏃-實作過程修改哪些檔案"><span class="octicon octicon-link"></span></a>🏃 實作過程(修改哪些檔案)</h1><h3 id="修改"><a class="anchor hidden-xs" href="#修改" title="修改"><span class="octicon octicon-link"></span></a>修改</h3><p>defs.h<br>
@@ -61,27 +62,26 @@ syscall.h<br>
 proc.c<br>
 <img src="https://i.imgur.com/gV7lvhv.png" alt=""><br>
 proc.h<br>
-<img src="https://i.imgur.com/27j22Yo.png" alt=""><br>
-trap.c</p><hr><h3 id="新增"><a class="anchor hidden-xs" href="#新增" title="新增"><span class="octicon octicon-link"></span></a>新增</h3><p><strong>ps.c</strong><br>
+<img src="https://i.imgur.com/27j22Yo.png" alt=""></p><hr><h3 id="新增"><a class="anchor hidden-xs" href="#新增" title="新增"><span class="octicon octicon-link"></span></a>新增</h3><p><strong>ps.c</strong><br>
 <img src="https://i.imgur.com/tOufuM2.png" alt=""><br>
 <strong>ch.c</strong><br>
 <img src="https://i.imgur.com/T7Bz2eE.png" alt=""><br>
 <strong>foo.c</strong><br>
 <img src="https://i.imgur.com/OraDYM4.png" alt=""><br>
 <strong>alarm.c</strong><br>
-<img src="https://i.imgur.com/gkr57XV.png" alt=""></p><hr><h1 id="😎-結論"><a class="anchor hidden-xs" href="#😎-結論" title="😎-結論"><span class="octicon octicon-link"></span></a>😎 結論</h1><p>xv6原始的排程演算為Round-Robin，我們新增了priority scheduling algorithm排程演算法，讓CPU根據每一個process的優先權來決定哪一個process需要先執行，並且我們設定能自行修改優先權，這樣讓使用者能自行調整想先執行的process，就不會有starving的問題，並且我們加上了alarm的功能，看顯示就能知道cpu目前執行process所花的時間。</p><hr><h1 id="📅-組員分工"><a class="anchor hidden-xs" href="#📅-組員分工" title="📅-組員分工"><span class="octicon octicon-link"></span></a>📅 組員分工</h1><p><img src="https://i.imgur.com/GDqrDVO.png" alt=""></p><p><img src="https://i.imgur.com/xLzcvQj.png" alt=""></p><p><img src="https://i.imgur.com/VbXnTwp.png" alt=""></p><hr><div class="resize-sensor" style="position: absolute; left: 0px; top: 0px; right: 0px; bottom: 0px; overflow: hidden; z-index: -1; visibility: hidden;"><div class="resize-sensor-expand" style="position: absolute; left: 0; top: 0; right: 0; bottom: 0; overflow: hidden; z-index: -1; visibility: hidden;"><div style="position: absolute; left: 0px; top: 0px; transition: 0s; width: 100000px; height: 100000px;"></div></div><div class="resize-sensor-shrink" style="position: absolute; left: 0; top: 0; right: 0; bottom: 0; overflow: hidden; z-index: -1; visibility: hidden;"><div style="position: absolute; left: 0; top: 0; transition: 0s; width: 200%; height: 200%"></div></div></div></div>
+<img src="https://i.imgur.com/gkr57XV.png" alt=""></p><hr><h1 id="😎-結論"><a class="anchor hidden-xs" href="#😎-結論" title="😎-結論"><span class="octicon octicon-link"></span></a>😎 結論</h1><p>xv6原始的排程演算為Round-Robin，我們新增了priority scheduling algorithm排程演算法，讓CPU根據每一個process的優先權來決定哪一個process需要先執行，並且我們設定能自行修改優先權，這樣讓使用者能自行調整想先執行的process，就不會有starving的問題，並且我們加上了alarm的功能，看顯示就能知道cpu目前執行process所花的時間。</p><hr><h1 id="📅-組員分工"><a class="anchor hidden-xs" href="#📅-組員分工" title="📅-組員分工"><span class="octicon octicon-link"></span></a>📅 組員分工</h1><p><img src="https://i.imgur.com/GDqrDVO.png" alt=""></p><p><img src="https://i.imgur.com/xLzcvQj.png" alt=""></p><p><img src="https://i.imgur.com/VbXnTwp.png" alt=""></p><hr></div>
     <div class="ui-toc dropup unselectable hidden-print" style="display:none;">
         <div class="pull-right dropdown">
             <a id="tocLabel" class="ui-toc-label btn btn-default" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false" title="Table of content">
                 <i class="fa fa-bars"></i>
             </a>
             <ul id="ui-toc" class="ui-toc-dropdown dropdown-menu" aria-labelledby="tocLabel">
-                <div class="toc"><ul class="nav"><li class=""><a href="#106-os-homework-2-2-成果報告書">106 OS homework 2-2 成果報告書</a></li><li class=""><a href="#🙂-使用情境說明包含流程圖">🙂 使用情境說明(包含流程圖)</a></li><li class=""><a href="#😇-成功畫面">😇 成功畫面</a></li><li><a href="#🏃-實作過程修改哪些檔案">🏃 實作過程(修改哪些檔案)</a><ul class="nav"><li><a href="#修改">修改</a></li><li><a href="#新增">新增</a></li></ul></li><li><a href="#😎-結論">😎 結論</a></li><li class=""><a href="#📅-組員分工">📅 組員分工</a></li></ul></div><div class="toc-menu"><a class="expand-toggle" href="#">Expand all</a><a class="back-to-top" href="#">Back to top</a><a class="go-to-bottom" href="#">Go to bottom</a></div>
+                <div class="toc"><ul class="nav"><li class=""><a href="#106-os-homework-2-2-成果報告書">106 OS homework 2-2 成果報告書</a></li><li><a href="#🙂-使用情境說明包含流程圖">🙂 使用情境說明(包含流程圖)</a></li><li><a href="#😇-成功畫面">😇 成功畫面</a></li><li><a href="#🏃-實作過程修改哪些檔案">🏃 實作過程(修改哪些檔案)</a><ul class="nav"><li><a href="#修改">修改</a></li><li><a href="#新增">新增</a></li></ul></li><li><a href="#😎-結論">😎 結論</a></li><li><a href="#📅-組員分工">📅 組員分工</a></li></ul></div><div class="toc-menu"><a class="expand-toggle" href="#">Expand all</a><a class="back-to-top" href="#">Back to top</a><a class="go-to-bottom" href="#">Go to bottom</a></div>
             </ul>
         </div>
     </div>
     <div id="ui-toc-affix" class="ui-affix-toc ui-toc-dropdown unselectable hidden-print" data-spy="affix" style="top:17px;display:none;"  >
-        <div class="toc"><ul class="nav"><li class=""><a href="#106-os-homework-2-2-成果報告書">106 OS homework 2-2 成果報告書</a></li><li class=""><a href="#🙂-使用情境說明包含流程圖">🙂 使用情境說明(包含流程圖)</a></li><li class=""><a href="#😇-成功畫面">😇 成功畫面</a></li><li><a href="#🏃-實作過程修改哪些檔案">🏃 實作過程(修改哪些檔案)</a><ul class="nav"><li><a href="#修改">修改</a></li><li><a href="#新增">新增</a></li></ul></li><li><a href="#😎-結論">😎 結論</a></li><li class=""><a href="#📅-組員分工">📅 組員分工</a></li></ul></div><div class="toc-menu"><a class="expand-toggle" href="#">Expand all</a><a class="back-to-top" href="#">Back to top</a><a class="go-to-bottom" href="#">Go to bottom</a></div>
+        <div class="toc"><ul class="nav"><li class=""><a href="#106-os-homework-2-2-成果報告書">106 OS homework 2-2 成果報告書</a></li><li><a href="#🙂-使用情境說明包含流程圖">🙂 使用情境說明(包含流程圖)</a></li><li><a href="#😇-成功畫面">😇 成功畫面</a></li><li><a href="#🏃-實作過程修改哪些檔案">🏃 實作過程(修改哪些檔案)</a><ul class="nav"><li><a href="#修改">修改</a></li><li><a href="#新增">新增</a></li></ul></li><li><a href="#😎-結論">😎 結論</a></li><li><a href="#📅-組員分工">📅 組員分工</a></li></ul></div><div class="toc-menu"><a class="expand-toggle" href="#">Expand all</a><a class="back-to-top" href="#">Back to top</a><a class="go-to-bottom" href="#">Go to bottom</a></div>
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha256-U5ZEeKfGNOja007MMD3YBI0A3OSZOQbeG6z2f2Y0hu8=" crossorigin="anonymous" defer></script>
