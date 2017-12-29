@@ -35,14 +35,24 @@
 </head>
 
 <body>
-    <div id="doc" class="markdown-body container-fluid" style="position: relative;"><h1 id="106-os-homework-2-2-成果報告書"><a class="anchor hidden-xs" href="#106-os-homework-2-2-成果報告書" title="106-os-homework-2-2-成果報告書"><span class="octicon octicon-link"></span></a>106 OS homework 2-2 成果報告書</h1><blockquote>
+    <div id="doc" class="markdown-body container-fluid"><h1 id="106-os-homework-2-2-成果報告書"><a class="anchor hidden-xs" href="#106-os-homework-2-2-成果報告書" title="106-os-homework-2-2-成果報告書"><span class="octicon octicon-link"></span></a>106 OS homework 2-2 成果報告書</h1><blockquote>
 <p>組長：B10415023、吳欣樺<br>
 組員：B10415026、林于婷<br>
 組員：B10415027、倪銓川<br>
 github:<a href="https://github.com/winterknow852/xv6-public" target="_blank">https://github.com/winterknow852/xv6-public</a></p>
 </blockquote><hr><h1 id="🙂-使用情境說明包含流程圖"><a class="anchor hidden-xs" href="#🙂-使用情境說明包含流程圖" title="🙂-使用情境說明包含流程圖"><span class="octicon octicon-link"></span></a>🙂 使用情境說明(包含流程圖)</h1><p><img src="https://i.imgur.com/UUj5mvJ.png" alt=""></p><p><img src="https://i.imgur.com/FMQqtFp.jpg" alt=""><br>
-<img src="https://i.imgur.com/XAAnu2j.png" alt=""></p><p>補充說明:<br>
-使用allocproc function將Process加入ptable中，$ps 即是輸出現有process的狀態，輸入指令＄foo會去呼叫我們內部新增的function foo.c，會新增新的children。上圖是scheduler執行步驟流程圖；下圖是新增功能說明圖示。</p><hr><h1 id="😇-成功畫面"><a class="anchor hidden-xs" href="#😇-成功畫面" title="😇-成功畫面"><span class="octicon octicon-link"></span></a>😇 成功畫面</h1><p>一開始priority都設為3，alarm在cpu開始跑時開始alarmtest starting，由我們設定的會印出"<mark>.</mark>"時間跑了10個cpu tick時就會印出alarm!並換行繼續<br>
+<img src="https://i.imgur.com/XAAnu2j.png" alt=""></p><p>補充說明:</p><ul>
+<li>使用allocproc function將Process加入ptable中。</li>
+<li>$ps 即是輸出現有process的狀態。</li>
+<li>輸入指令＄foo n d會新增新的children
+<ul>
+<li>n表示想要創造的children數，n必須大於0或者小於20，否則設為2；</li>
+<li>d為for loop的增值，若未輸入增值，則自動設為1；</li>
+<li>for loop是children用來消耗CPU時間，以便觀察process狀態的改變。</li>
+</ul>
+</li>
+<li>上圖是scheduler執行步驟流程圖；下圖是新增功能說明圖示。</li>
+</ul><hr><h1 id="😇-成功畫面"><a class="anchor hidden-xs" href="#😇-成功畫面" title="😇-成功畫面"><span class="octicon octicon-link"></span></a>😇 成功畫面</h1><p>一開始priority都設為3，alarm在cpu開始跑時開始alarmtest starting，由我們設定的會印出"<mark>.</mark>"時間跑了10個cpu tick時就會印出alarm!並換行繼續<br>
 <img src="https://i.imgur.com/jf4ealf.png" alt=""></p><p>呼叫測試數值foo，依據我們設定的值，parent會fork出child，child的priority我們都預設為10<br>
 <img src="https://i.imgur.com/Oopo8lj.png" alt=""></p><p>接下來我們就能自己輸入修改他的priority，輸入ch 10 5 就能把pid10的foo的priority從原本的10設成5，也可以看到pid10一直在RUNNING的狀態，因為他有最高的priority。<br>
 <img src="https://i.imgur.com/B8GQFGw.png" alt=""><br>
@@ -76,12 +86,12 @@ proc.h<br>
                 <i class="fa fa-bars"></i>
             </a>
             <ul id="ui-toc" class="ui-toc-dropdown dropdown-menu" aria-labelledby="tocLabel">
-                <div class="toc"><ul class="nav"><li class=""><a href="#106-os-homework-2-2-成果報告書">106 OS homework 2-2 成果報告書</a></li><li class=""><a href="#🙂-使用情境說明包含流程圖">🙂 使用情境說明(包含流程圖)</a></li><li class=""><a href="#😇-成功畫面">😇 成功畫面</a></li><li class=""><a href="#🏃-實作過程修改哪些檔案">🏃 實作過程(修改哪些檔案)</a><ul class="nav"><li class=""><a href="#修改">修改</a></li><li class=""><a href="#新增">新增</a></li></ul></li><li><a href="#😎-結論">😎 結論</a></li><li><a href="#📅-組員分工">📅 組員分工</a></li></ul></div><div class="toc-menu"><a class="expand-toggle" href="#">Expand all</a><a class="back-to-top" href="#">Back to top</a><a class="go-to-bottom" href="#">Go to bottom</a></div>
+                <div class="toc"><ul class="nav"><li class=""><a href="#106-os-homework-2-2-成果報告書">106 OS homework 2-2 成果報告書</a></li><li class=""><a href="#🙂-使用情境說明包含流程圖">🙂 使用情境說明(包含流程圖)</a></li><li><a href="#😇-成功畫面">😇 成功畫面</a></li><li><a href="#🏃-實作過程修改哪些檔案">🏃 實作過程(修改哪些檔案)</a><ul class="nav"><li><a href="#修改">修改</a></li><li><a href="#新增">新增</a></li></ul></li><li><a href="#😎-結論">😎 結論</a></li><li><a href="#📅-組員分工">📅 組員分工</a></li></ul></div><div class="toc-menu"><a class="expand-toggle" href="#">Expand all</a><a class="back-to-top" href="#">Back to top</a><a class="go-to-bottom" href="#">Go to bottom</a></div>
             </ul>
         </div>
     </div>
     <div id="ui-toc-affix" class="ui-affix-toc ui-toc-dropdown unselectable hidden-print" data-spy="affix" style="top:17px;display:none;"  >
-        <div class="toc"><ul class="nav"><li class=""><a href="#106-os-homework-2-2-成果報告書">106 OS homework 2-2 成果報告書</a></li><li class=""><a href="#🙂-使用情境說明包含流程圖">🙂 使用情境說明(包含流程圖)</a></li><li class=""><a href="#😇-成功畫面">😇 成功畫面</a></li><li class=""><a href="#🏃-實作過程修改哪些檔案">🏃 實作過程(修改哪些檔案)</a><ul class="nav"><li class=""><a href="#修改">修改</a></li><li class=""><a href="#新增">新增</a></li></ul></li><li><a href="#😎-結論">😎 結論</a></li><li><a href="#📅-組員分工">📅 組員分工</a></li></ul></div><div class="toc-menu"><a class="expand-toggle" href="#">Expand all</a><a class="back-to-top" href="#">Back to top</a><a class="go-to-bottom" href="#">Go to bottom</a></div>
+        <div class="toc"><ul class="nav"><li class=""><a href="#106-os-homework-2-2-成果報告書">106 OS homework 2-2 成果報告書</a></li><li class=""><a href="#🙂-使用情境說明包含流程圖">🙂 使用情境說明(包含流程圖)</a></li><li><a href="#😇-成功畫面">😇 成功畫面</a></li><li><a href="#🏃-實作過程修改哪些檔案">🏃 實作過程(修改哪些檔案)</a><ul class="nav"><li><a href="#修改">修改</a></li><li><a href="#新增">新增</a></li></ul></li><li><a href="#😎-結論">😎 結論</a></li><li><a href="#📅-組員分工">📅 組員分工</a></li></ul></div><div class="toc-menu"><a class="expand-toggle" href="#">Expand all</a><a class="back-to-top" href="#">Back to top</a><a class="go-to-bottom" href="#">Go to bottom</a></div>
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha256-U5ZEeKfGNOja007MMD3YBI0A3OSZOQbeG6z2f2Y0hu8=" crossorigin="anonymous" defer></script>
