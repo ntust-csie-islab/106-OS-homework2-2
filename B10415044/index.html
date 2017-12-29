@@ -39,7 +39,7 @@
 <p>組長：B10415044、吳唯甄<br>
 組員：B10415017、時安劼<br>
 組員：B10415021、呂承叡<br>
-github: <a href="https://github.com/%5Bweizhenwu%5D/xv6-public" target="_blank">https://github.com/[weizhenwu]/xv6-public</a></p>
+github: <a href="https://github.com/tsukiko410/xv6-public" target="_blank">https://github.com/tsukiko410/xv6-public</a></p>
 </blockquote><hr><h1 id="🙂-使用情境說明包含流程圖"><a class="anchor hidden-xs" href="#🙂-使用情境說明包含流程圖" title="🙂-使用情境說明包含流程圖"><span class="octicon octicon-link"></span></a>🙂 使用情境說明(包含流程圖)</h1><p>主要功能：</p><ol>
 <li>依照process的priority排程，值越小，priority越高</li>
 <li>初始priority排程方式為先進先做，會依據目前RUNNABLE的process數量去分配priority</li>
@@ -194,19 +194,19 @@ schedular(void)<br>
 </ol><hr><h1 id="😎-結論"><a class="anchor hidden-xs" href="#😎-結論" title="😎-結論"><span class="octicon octicon-link"></span></a>😎 結論</h1><p>從理論上來看有非常多種排成方式。然而每一種方式都會有其優缺點，因此希望能結合多種排程，讓系統依據程序的需求使用適合的排程方式。<br>
 在實作過程中，較為困難的就是判斷哪種類型的process需要哪種排程。像是當輸入指令時會呼叫到 sh syscall判斷輸入的指令，而起初設定排程時並沒有考慮進去。所以當所有CPU被占去後就沒辦法執行輸入的指令。所以可能對於如何分辨process的重要程度是我們還可以努力嘗試的。</p><hr><h1 id="📅-組員分工"><a class="anchor hidden-xs" href="#📅-組員分工" title="📅-組員分工"><span class="octicon octicon-link"></span></a>📅 組員分工</h1><p>吳唯甄：基本排程功能、報告撰寫<br>
 時安劼：排程架構、排程deadline部分<br>
-呂承叡：設定與判斷排程時間、deadline與priority、CPU ticks</p><hr><div class="resize-sensor" style="position: absolute; left: 0px; top: 0px; right: 0px; bottom: 0px; overflow: hidden; z-index: -1; visibility: hidden;"><div class="resize-sensor-expand" style="position: absolute; left: 0; top: 0; right: 0; bottom: 0; overflow: hidden; z-index: -1; visibility: hidden;"><div style="position: absolute; left: 0px; top: 0px; transition: 0s; width: 100000px; height: 100000px;"></div></div><div class="resize-sensor-shrink" style="position: absolute; left: 0; top: 0; right: 0; bottom: 0; overflow: hidden; z-index: -1; visibility: hidden;"><div style="position: absolute; left: 0; top: 0; transition: 0s; width: 200%; height: 200%"></div></div></div></div>
+呂承叡：設定與判斷排程時間、deadline與priority、CPU ticks</p><hr></div>
     <div class="ui-toc dropup unselectable hidden-print" style="display:none;">
         <div class="pull-right dropdown">
             <a id="tocLabel" class="ui-toc-label btn btn-default" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false" title="Table of content">
                 <i class="fa fa-bars"></i>
             </a>
             <ul id="ui-toc" class="ui-toc-dropdown dropdown-menu" aria-labelledby="tocLabel">
-                <div class="toc"><ul class="nav"><li class=""><a href="#106-os-homework-2-2-成果報告書">106 OS homework 2-2 成果報告書</a></li><li class=""><a href="#🙂-使用情境說明包含流程圖">🙂 使用情境說明(包含流程圖)</a></li><li class=""><a href="#😇-成功畫面">😇 成功畫面</a></li><li class=""><a href="#🏃-實作過程修改哪些檔案含圖片">🏃 實作過程(修改哪些檔案[含圖片])</a></li><li><a href="#😎-結論">😎 結論</a></li><li><a href="#📅-組員分工">📅 組員分工</a></li></ul></div><div class="toc-menu"><a class="expand-toggle" href="#">Expand all</a><a class="back-to-top" href="#">Back to top</a><a class="go-to-bottom" href="#">Go to bottom</a></div>
+                <div class="toc"><ul class="nav"><li class=""><a href="#106-os-homework-2-2-成果報告書">106 OS homework 2-2 成果報告書</a></li><li><a href="#🙂-使用情境說明包含流程圖">🙂 使用情境說明(包含流程圖)</a></li><li><a href="#😇-成功畫面">😇 成功畫面</a></li><li><a href="#🏃-實作過程修改哪些檔案含圖片">🏃 實作過程(修改哪些檔案[含圖片])</a></li><li><a href="#😎-結論">😎 結論</a></li><li><a href="#📅-組員分工">📅 組員分工</a></li></ul></div><div class="toc-menu"><a class="expand-toggle" href="#">Expand all</a><a class="back-to-top" href="#">Back to top</a><a class="go-to-bottom" href="#">Go to bottom</a></div>
             </ul>
         </div>
     </div>
     <div id="ui-toc-affix" class="ui-affix-toc ui-toc-dropdown unselectable hidden-print" data-spy="affix" style="top:17px;display:none;"  >
-        <div class="toc"><ul class="nav"><li class=""><a href="#106-os-homework-2-2-成果報告書">106 OS homework 2-2 成果報告書</a></li><li class=""><a href="#🙂-使用情境說明包含流程圖">🙂 使用情境說明(包含流程圖)</a></li><li class=""><a href="#😇-成功畫面">😇 成功畫面</a></li><li class=""><a href="#🏃-實作過程修改哪些檔案含圖片">🏃 實作過程(修改哪些檔案[含圖片])</a></li><li><a href="#😎-結論">😎 結論</a></li><li><a href="#📅-組員分工">📅 組員分工</a></li></ul></div><div class="toc-menu"><a class="expand-toggle" href="#">Expand all</a><a class="back-to-top" href="#">Back to top</a><a class="go-to-bottom" href="#">Go to bottom</a></div>
+        <div class="toc"><ul class="nav"><li class=""><a href="#106-os-homework-2-2-成果報告書">106 OS homework 2-2 成果報告書</a></li><li><a href="#🙂-使用情境說明包含流程圖">🙂 使用情境說明(包含流程圖)</a></li><li><a href="#😇-成功畫面">😇 成功畫面</a></li><li><a href="#🏃-實作過程修改哪些檔案含圖片">🏃 實作過程(修改哪些檔案[含圖片])</a></li><li><a href="#😎-結論">😎 結論</a></li><li><a href="#📅-組員分工">📅 組員分工</a></li></ul></div><div class="toc-menu"><a class="expand-toggle" href="#">Expand all</a><a class="back-to-top" href="#">Back to top</a><a class="go-to-bottom" href="#">Go to bottom</a></div>
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha256-U5ZEeKfGNOja007MMD3YBI0A3OSZOQbeG6z2f2Y0hu8=" crossorigin="anonymous" defer></script>
