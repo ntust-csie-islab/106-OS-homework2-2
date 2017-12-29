@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 
 <html lang="en">
 
@@ -39,7 +39,7 @@
 <p>組長：B10415009、徐晟鈞<br>
 組員：B10415014、湯志超<br>
 組員：B10415042、蔡奇霖<br>
-github: <a href="https://github.com/chengchunhsu/xv6-public" target="_blank">https://github.com/chengchunhsu/xv6-public</a></p>
+github: <a href="https://github.com/tangchihchao/xv6-public" target="_blank">https://github.com/tangchihchao/xv6-public</a></p>
 </blockquote><hr><h1 id="🙂-使用情境說明包含流程圖"><a class="anchor hidden-xs" href="#🙂-使用情境說明包含流程圖" title="🙂-使用情境說明包含流程圖"><span class="octicon octicon-link"></span></a>🙂 使用情境說明(包含流程圖)</h1><p>我們打算增加保護文件系統(file system protection)的功能。</p><p>參考ZFS，我們將為文件系統添加一個重複區塊(ditto blocks)的概念，所謂ditto block如同字面意思，即為資料區塊的備份。實際上來說就是一個原文件inode的鏡像(mirror)，並讓指標(pointer)指向一個複製原始內容新的資料區(data blocks)。</p><p><img src="https://i.imgur.com/wxf9yoE.jpg" alt=""><br>
 (圖1 資料結構)</p><p>新增一個<code>checksum()</code>的函式，使其以inode作為argument產生一個數值。讓所有data block都以這個函式產生一個數值並儲存於自身資料區。</p><p>接著以後每次存取file的時候(call <code>ilock()</code>)，系統都會重新計算一次並與儲存資料內數值比較來校驗資料的正確性，若是不同則代表數據的損壞。</p><p>偵測到文件損壞後，則試圖在ditto block尋找之前備份完好的資料。</p><p>若是找到，則用它取代損壞的資料以及其他ditto block。若是找不到，則中止<code>ilock()</code>函式並返回錯誤訊息。</p><p><img src="https://i.imgur.com/9NH0pGx.png" alt=""></p><p>(圖二 救援inode流程圖)</p><hr><h1 id="😇-成功畫面"><a class="anchor hidden-xs" href="#😇-成功畫面" title="😇-成功畫面"><span class="octicon octicon-link"></span></a>😇 成功畫面</h1><p>先使用<code>mkdir</code>創建一個路徑在xv6裡面。<br>
 再以<code>ls</code>確認是否有出現在root裡。<br>
