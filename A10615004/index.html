@@ -139,7 +139,7 @@ cd xv6<br>
 我們也需要考慮如何使用邏輯塊編號為雙向二次間接塊和它指向的索引。我們改變了NDIRECT的定義，同時在file.h的struct inode中改變了addrs的大小。確保struct inode和struct dinode在addrs數組中具有相同數量的元素。需要分配二次塊和二次指針塊，如原始bmap（）。二次尋找地址數據塊的儲存元組被看做是二次尋址地址將其一次尋找地址到的數據塊。<br>
 通過我們的編程實做和測試結果來看，我們的xv6具備了接納大文件的能力。</p>
 </blockquote><hr><h1 id="📅-組員分工" style=""><a class="anchor hidden-xs" href="#📅-組員分工" title="📅-組員分工"><span class="octicon octicon-link"></span></a>📅 組員分工</h1><blockquote>
-<p>A10615005 包含 修改文檔fs.c，修改Makefile，xv6安裝與測試以及文檔編寫。<br>
+<p>A10615005 包含 修改文檔fs.c，創建文檔big.c，修改Makefile，xv6安裝與測試以及文檔編寫。<br>
 A10615004 曾偉傑 修改文檔log.c,fs.h,file.h,param.h并參與討論。</p>
 </blockquote><hr><div class="resize-sensor" style="position: absolute; left: 0px; top: 0px; right: 0px; bottom: 0px; overflow: hidden; z-index: -1; visibility: hidden;"><div class="resize-sensor-expand" style="position: absolute; left: 0; top: 0; right: 0; bottom: 0; overflow: hidden; z-index: -1; visibility: hidden;"><div style="position: absolute; left: 0px; top: 0px; transition: 0s; width: 100000px; height: 100000px;"></div></div><div class="resize-sensor-shrink" style="position: absolute; left: 0; top: 0; right: 0; bottom: 0; overflow: hidden; z-index: -1; visibility: hidden;"><div style="position: absolute; left: 0; top: 0; transition: 0s; width: 200%; height: 200%"></div></div></div></div>
     <div class="ui-toc dropup unselectable hidden-print" style="display:none;">
