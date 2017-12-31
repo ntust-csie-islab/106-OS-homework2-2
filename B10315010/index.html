@@ -46,14 +46,15 @@ github: <a href="https://github.com/twilightc/xv6-public" target="_blank">https:
 <li></li>
 </ol><p><img src="https://i.imgur.com/LNiWbM9.png" alt=""></p><p>3.輸入showdate後，即時顯示日期與時間(UTC+8)</p><hr><h1 id="😇-成功畫面"><a class="anchor hidden-xs" href="#😇-成功畫面" title="😇-成功畫面"><span class="octicon octicon-link"></span></a>😇 成功畫面</h1><p>scheduler的部分因為遭遇一些困難導致未能像流程圖當中的結果呈現，也因此這裡只放上結束xv6與即時顯示日期的執行畫面。</p><p><img src="https://i.imgur.com/1rCeAHu.png" alt=""></p><p><img src="https://i.imgur.com/hpQDO0t.png" alt=""></p><hr><h1 id="🏃-實作過程修改哪些檔案含圖片"><a class="anchor hidden-xs" href="#🏃-實作過程修改哪些檔案含圖片" title="🏃-實作過程修改哪些檔案含圖片"><span class="octicon octicon-link"></span></a>🏃 實作過程(修改哪些檔案[含圖片])</h1><p>為求版面平整，圖片方面主要以date為主，其他部分佐以文字補助說明<br>
 date部分：<br>
-1.在syscall.h中加入定義的system call</p><p><img src="https://i.imgur.com/d0nOLov.png" alt=""></p><p>2.defs.h中在欲實作部分加入宣告</p><p>3.在syscall.c加入來自外部的函數定義</p><p><img src="https://i.imgur.com/jJ4XNQ1.png" alt=""></p><p>4.在sysproc.c中加入系統函數內容</p><p><img src="https://i.imgur.com/OrwjWkK.png" alt=""><br>
+1.在syscall.h中加入定義的system call</p><p><img src="https://i.imgur.com/d0nOLov.png" alt=""></p><p>2.defs.h中在欲實作部分加入宣告</p><p><img src="https://i.imgur.com/dvU156L.png" alt=""></p><p>3.在syscall.c加入來自外部的函數定義</p><p><img src="https://i.imgur.com/jJ4XNQ1.png" alt=""></p><p>4.在sysproc.c中加入系統函數內容</p><p><img src="https://i.imgur.com/OrwjWkK.png" alt=""><br>
 <img src="https://i.imgur.com/oimU7l9.png" alt=""></p><p>5.在user.h中定義user方函數的定義</p><p><img src="https://i.imgur.com/dqQgA61.png" alt=""></p><p>6.usys.S中加入SYSCALL(函數名)</p><p><img src="https://i.imgur.com/cadNxPK.png" alt=""></p><p>7.定義使用者呼叫函數時顯示的內容</p><p><img src="https://i.imgur.com/0JvFbbt.png" alt=""></p><p>8.修改Makefile中UPROGS的部分</p><p><img src="https://i.imgur.com/oc7bVws.png" alt=""></p><p>9.開啟xv6，先檢查是否有指定函數後測試功能</p><p>halt:與上述修改地方大致雷同，另有halt.c為使用端呼叫函數<br>
 scheduler:與上述修改地方大致雷同，另外在:</p><ol>
 <li>proc.c內 struct proc的部分加入int priority<br>
 修改scheduler()部分<br>
 spinlock.h內的資料結構加入lockcount變數<br>
 spinlock.c             getlockcount()<br>
-gettimertick() (預計)</li>
+gettimertick() (預計)<br>
+加入frk.c方便測試</li>
 </ol><hr><h1 id="😎-結論"><a class="anchor hidden-xs" href="#😎-結論" title="😎-結論"><span class="octicon octicon-link"></span></a>😎 結論</h1><p>透過自己一步一步修改功能，以及大量查詢網路上的資料及教學，這門課讓我對OS中，如何透過shell運作process有更深一層的認識，途中曾經遇到閃神把原本xv6當中proc.c fork()的資料刪除一部分，搞得整夜沒睡的窘境，或是修改scheduler時沒有注意到資料結構的特性搞得一運作xv6就當機，導致最後scheduler的功能顯得陽春，不論結果是好是壞，相信這個學習的過程會對我在面對更複雜的系統提供更多的幫助。</p><hr><h1 id="📅-組員分工"><a class="anchor hidden-xs" href="#📅-組員分工" title="📅-組員分工"><span class="octicon octicon-link"></span></a>📅 組員分工</h1><p>本人：找資料，撰寫程式碼，測試</p><hr></div>
     <div class="ui-toc dropup unselectable hidden-print" style="display:none;">
         <div class="pull-right dropdown">
@@ -61,12 +62,12 @@ gettimertick() (預計)</li>
                 <i class="fa fa-bars"></i>
             </a>
             <ul id="ui-toc" class="ui-toc-dropdown dropdown-menu" aria-labelledby="tocLabel">
-                <div class="toc"><ul class="nav"><li class=""><a href="#106-os-homework-2-2-成果報告書">106 OS homework 2-2 成果報告書</a></li><li class=""><a href="#🙂-使用情境說明包含流程圖">🙂 使用情境說明(包含流程圖)</a></li><li class=""><a href="#😇-成功畫面">😇 成功畫面</a></li><li class=""><a href="#🏃-實作過程修改哪些檔案含圖片">🏃 實作過程(修改哪些檔案[含圖片])</a></li><li class=""><a href="#😎-結論">😎 結論</a></li><li class=""><a href="#📅-組員分工">📅 組員分工</a></li></ul></div><div class="toc-menu"><a class="expand-toggle" href="#">Expand all</a><a class="back-to-top" href="#">Back to top</a><a class="go-to-bottom" href="#">Go to bottom</a></div>
+                <div class="toc"><ul class="nav"><li class=""><a href="#106-os-homework-2-2-成果報告書">106 OS homework 2-2 成果報告書</a></li><li class=""><a href="#🙂-使用情境說明包含流程圖">🙂 使用情境說明(包含流程圖)</a></li><li><a href="#😇-成功畫面">😇 成功畫面</a></li><li class=""><a href="#🏃-實作過程修改哪些檔案含圖片">🏃 實作過程(修改哪些檔案[含圖片])</a></li><li><a href="#😎-結論">😎 結論</a></li><li><a href="#📅-組員分工">📅 組員分工</a></li></ul></div><div class="toc-menu"><a class="expand-toggle" href="#">Expand all</a><a class="back-to-top" href="#">Back to top</a><a class="go-to-bottom" href="#">Go to bottom</a></div>
             </ul>
         </div>
     </div>
     <div id="ui-toc-affix" class="ui-affix-toc ui-toc-dropdown unselectable hidden-print" data-spy="affix" style="top:17px;display:none;"  >
-        <div class="toc"><ul class="nav"><li class=""><a href="#106-os-homework-2-2-成果報告書">106 OS homework 2-2 成果報告書</a></li><li class=""><a href="#🙂-使用情境說明包含流程圖">🙂 使用情境說明(包含流程圖)</a></li><li class=""><a href="#😇-成功畫面">😇 成功畫面</a></li><li class=""><a href="#🏃-實作過程修改哪些檔案含圖片">🏃 實作過程(修改哪些檔案[含圖片])</a></li><li class=""><a href="#😎-結論">😎 結論</a></li><li class=""><a href="#📅-組員分工">📅 組員分工</a></li></ul></div><div class="toc-menu"><a class="expand-toggle" href="#">Expand all</a><a class="back-to-top" href="#">Back to top</a><a class="go-to-bottom" href="#">Go to bottom</a></div>
+        <div class="toc"><ul class="nav"><li class=""><a href="#106-os-homework-2-2-成果報告書">106 OS homework 2-2 成果報告書</a></li><li class=""><a href="#🙂-使用情境說明包含流程圖">🙂 使用情境說明(包含流程圖)</a></li><li><a href="#😇-成功畫面">😇 成功畫面</a></li><li class=""><a href="#🏃-實作過程修改哪些檔案含圖片">🏃 實作過程(修改哪些檔案[含圖片])</a></li><li><a href="#😎-結論">😎 結論</a></li><li><a href="#📅-組員分工">📅 組員分工</a></li></ul></div><div class="toc-menu"><a class="expand-toggle" href="#">Expand all</a><a class="back-to-top" href="#">Back to top</a><a class="go-to-bottom" href="#">Go to bottom</a></div>
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha256-U5ZEeKfGNOja007MMD3YBI0A3OSZOQbeG6z2f2Y0hu8=" crossorigin="anonymous" defer></script>
